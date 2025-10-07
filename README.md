@@ -1,4 +1,14 @@
-**Deskripsi website:**
+**Deskripsi website kami**
+SportZone.id adalah aplikasi area serba olahraga, cocok untuk forum global. Kesannya adalah modern dan mudah diingat karena merupakan gaya internasional. Website tersebut cocok untuk platform berita & forum dengan target generasi muda.
+
+**Nama anggota kelompok & NPM:**
+Josh Christmas Rommlynn (2406395291)
+Theo Samuel (2406496366)
+Ahmad Yaqdhan (2406399081)
+Andrew Wanarahardja (2406407373)
+Ausy Dhafa Adhitama (2406417954)
+
+**Daftar modul + Deskripsi modul:**
 
 1. Profile (show & edit)
 Ini nanti bakal nampilin profile pic pengguna, nama, username, tanggal lahir, sama ngelist post & komentar yang user ini bikin.
@@ -15,9 +25,3 @@ Marketplace tempat jualan barang. Bakal nampilin nama, harga, deskripsi, gambar,
 5. Homepage, Navbar, Footer, Sign in, Register
 Sesuai dengan namanya, yang ngambil ini bakal ngerjain tampilan homepage, navbar, footer, serta sign in & register. Homepage bakal nampilin beberapa artikel, forum, dan produk yang lagi hangat / populer. Navbar dan footer konsisten bakalan dipake di semua page / modul. Navbar kira-kira bisa ngikut aja yang kayak di tutorial: logo / nama web di kiri, link-link navigasi di tengah, informasi profil di kanan atas. Sign in bakal nerima email dan password, as usual. Register bakal nerima semua data yang basically ditampilin di profile.
 
-**Nama anggota kelompok & NPM:**
-Josh Christmas Rommlynn (2406395291)
-Theo Samuel (2406496366)
-Ahmad Yaqdhan (2406399081)
-Andrew Wanarahardja (2406407373)
-Ausy Dhafa Adhitama (2406417954)
