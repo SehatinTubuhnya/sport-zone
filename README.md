@@ -1,36 +1,74 @@
-**Deskripsi website kami**
-SportZone.id adalah aplikasi area serba olahraga, cocok untuk forum global. Kesannya adalah modern dan mudah diingat karena merupakan gaya internasional. Website tersebut cocok untuk platform berita & forum dengan target generasi muda.
+# SportZone
+SportZone.id adalah aplikasi area serba olahraga, cocok untuk forum global.
+Kesannya adalah modern dan mudah diingat karena merupakan gaya internasional.
+SportZone.id cocok untuk platform berita & forum dengan target generasi muda.
 
-**Nama anggota kelompok & NPM:**
-Josh Christmas Rommlynn (2406395291)
-Theo Samuel (2406496366)
-Ahmad Yaqdhan (2406399081)
-Andrew Wanarahardja (2406407373)
-Ausy Dhafa Adhitama (2406417954)
+Deployment PWS: https://josh-christmas-sport-zone.pbp.cs.ui.ac.id/
 
-**Daftar modul + Deskripsi modul:**
+## Nama & NPM Anggota Kelompok
+- Josh Christmas Rommlynn (2406395291)
+- Theo Samuel (2406496366)
+- Ahmad Yaqdhan (2406399081)
+- Andrew Wanarahardja (2406407373)
+- Ausy Dhafa Adhitama (2406417954)
 
-1. Profile (show & edit)
-Ini nanti bakal nampilin profile pic pengguna, nama, username, tanggal lahir, sama ngelist post & komentar yang user ini bikin.
+## Daftar Modul
+### Profile
+Modul ini akan menampilkan profil user website. Informasi yang akan ditampilkan mencakup:
+- Foto profil pengguna
+- Nama
+- Username
+- Tanggal lahir
+- Daftar post & komentar yang pernah dibuat oleh pengguna
+- Produk yang dijual oleh pengguna (apabila akun ini adalah akun Penjual)
+- Artikel yang dibuat oleh pengguna (apabila akun ini adalah akun Editor)
 
-2. Artikel / News (show, edit, filter)
-Bakalan nampilin title, tanggal pembuatan artikel, thumbnail / gambar, konten artikel. Nanti di artikel bisa naro komentar, dan tiap-tiap komentar nanti ada pfp dan nama si user yang bisa diklik dan bakal ngarah ke profile usernya.
+Modul ini juga akan menghandle pembuatan menu Login dan Register.
 
-3. Discussion Posts / Forum (show, edit, filter)
-Tar jadinya kayak twitter gitu bayangan gw, cuma replynya gak bisa ber layer layer. Cukup satu aja gpp. Bedanya ini dengan artikel adalah ya ini kontennya lebih dikit dan gak ada thumbnail / gambar. User tetep bakalan bisa komentar
+### Artikel / News
+Modul ini berisi artikel dan berita mengenai olahraga yang bisa ditulis oleh admin dan editor. Informasi yang akan ditampilkan mencakup:
+- Judul artikel
+- Thumbnail
+- Konten
+- Komentar
 
-4. Products (show, edit, filter)
-Marketplace tempat jualan barang. Bakal nampilin nama, harga, deskripsi, gambar, dan card penjual. Gambar mungkin juga bisa kita bikin biar user bisa add multiple, i guess. Selain dari field-field tadi, penjual juga bisa add nomor telepon atau kontak lain yang bisa dihubungin buat kalau misal tertarik buat beli.
+User lain dapat menaruh komentar di postingan tersebut. Komentar akan menampilkan foto profil, nama user, dan komentar user. Foto profil dan nama user apabila diklik akan menavigasi ke profile user tersebut.
 
-5. Homepage, Navbar, Footer, Sign in, Register
-Sesuai dengan namanya, yang ngambil ini bakal ngerjain tampilan homepage, navbar, footer, serta sign in & register. Homepage bakal nampilin beberapa artikel, forum, dan produk yang lagi hangat / populer. Navbar dan footer konsisten bakalan dipake di semua page / modul. Navbar kira-kira bisa ngikut aja yang kayak di tutorial: logo / nama web di kiri, link-link navigasi di tengah, informasi profil di kanan atas. Sign in bakal nerima email dan password, as usual. Register bakal nerima semua data yang basically ditampilin di profile.
+### Discussion Posts / Forum
+Modul ini berisi sistem forum seperti platform Twitter. Informasi yang akan ditampilkan mencakup:
+- Konten singkat berupa sebuah opini atau pertanyaan pembuka
+- Komentar
 
-**Sumber initial dataset**
-- https://sport.detik.com/
-- https://www.sportsstation.id/
+### Products (show, edit, filter)
+Modul ini berfungsi sebagai sebuah toko untuk menjual produk olahraga. Informasi yang akan ditampilkan pada tiap-tiap produk mencakup:
+- Nama produk
+- Harga
+- Deskripsi atau detail produk
+- Gambar produk (bisa lebih dari satu)
+- Informasi kontak penjual apabila pengguna berminat ingin beli
+
+### Admin Page
+Modul ini berfungsi sebagai tempat admin mengontrol apa yang terjadi pada website. Informasi yang ditampilkan mencakup:
+- Daftar produk dalam bentuk non-card
+  Terdapat tombol edit & delete pada masing-masing produk. Admin juga dapat menambah produk melalui menu ini.
+- Daftar user
+  Admin dapat menambah & menghapus user melalui menu ini. Admin juga dapat menyetel role dari tiap-tiap akun.
+- Log aktivitas
+  Daftar aktivitas yang dilakukan di website. Aktivitas seperti membuat akun, menghapus produk, dsb akan tercatat di sini
+
+Modul ini juga akan menghandle pembuatan Homepage dan Navbar.
+
+## Sumber initial dataset
+- detiksport  
+  URL: https://sport.detik.com/  
+  Metode: Scraping
+
+- Sports Station  
+  URL: https://www.sportsstation.id/  
+  Metode: Scraping
   
-**Jenis Pengguna**
-1. Admin
+## Jenis Pengguna
+### Admin
 Administrator merupakan pemilik dan pengelola utama situs web.
 Memiliki hak akses penuh terhadap seluruh modul dan konten yang terdapat di dalam sistem.
 Hak dan Tanggung Jawab:
@@ -39,7 +77,7 @@ Hak dan Tanggung Jawab:
 - Mengedit, menghapus, atau memperbarui informasi pada semua modul.
 - Menjaga keamanan dan stabilitas sistem secara keseluruhan.
 
-2. Pengguna (User)
+### Pengguna (User)
 Pengguna merupakan anggota terdaftar yang dapat berinteraksi dengan konten dan komunitas di dalam situs web, namun tidak memiliki izin untuk membuat konten utama atau produk.
 Hak dan Tanggung Jawab:
 - Memberikan komentar pada artikel, forum, dan produk.
@@ -51,7 +89,7 @@ Batasan Akses:
 - Tidak dapat membuat atau mengedit artikel.
 - Tidak dapat menambahkan atau mengelola produk.
 
-3. Tamu (Guest)
+### Tamu (Guest)
 Tamu adalah pengunjung yang belum terdaftar atau belum melakukan proses masuk (sign in) pada sistem.
 Hak dan Tanggung Jawab:
 - Dapat melihat artikel, forum, dan produk yang tersedia untuk publik.
@@ -61,7 +99,7 @@ Hak dan Tanggung Jawab:
 - Tidak dapat membuat, mengedit, atau berinteraksi dengan konten.
 - Tidak memiliki akses ke fitur pengguna yang memerlukan autentikasi.
 
-4. Penjual (Seller)
+### Penjual (Seller)
 Penjual merupakan pengguna yang memiliki izin untuk menambahkan dan mengelola produk dalam sistem marketplace.
 Hak dan Tanggung Jawab:
 - Membuat dan mempublikasikan produk baru.
@@ -71,7 +109,7 @@ Hak dan Tanggung Jawab:
 Batasan Akses:
 - Tidak memiliki akses untuk membuat artikel atau berita.
 
-5. Editor / Author
+### Editor / Author
 Editor atau Author merupakan pengguna dengan wewenang untuk membuat dan mempublikasikan konten artikel pada situs web.
 
 Hak dan Tanggung Jawab:
