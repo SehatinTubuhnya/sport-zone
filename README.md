@@ -94,7 +94,7 @@ Tamu adalah pengunjung yang belum terdaftar atau belum melakukan proses masuk (s
 Hak dan Tanggung Jawab:
 - Dapat melihat artikel, forum, dan produk yang tersedia untuk publik.
   
-  Batasan Akses:
+Batasan Akses:
 - Tidak dapat memberikan komentar atau reaction.
 - Tidak dapat membuat, mengedit, atau berinteraksi dengan konten.
 - Tidak memiliki akses ke fitur pengguna yang memerlukan autentikasi.
