@@ -25,6 +25,10 @@ Marketplace tempat jualan barang. Bakal nampilin nama, harga, deskripsi, gambar,
 5. Homepage, Navbar, Footer, Sign in, Register
 Sesuai dengan namanya, yang ngambil ini bakal ngerjain tampilan homepage, navbar, footer, serta sign in & register. Homepage bakal nampilin beberapa artikel, forum, dan produk yang lagi hangat / populer. Navbar dan footer konsisten bakalan dipake di semua page / modul. Navbar kira-kira bisa ngikut aja yang kayak di tutorial: logo / nama web di kiri, link-link navigasi di tengah, informasi profil di kanan atas. Sign in bakal nerima email dan password, as usual. Register bakal nerima semua data yang basically ditampilin di profile.
 
+**Sumber initial dataset**
+- https://sport.detik.com/
+- https://www.sportsstation.id/
+  
 **Jenis Pengguna**
 1. Admin
 Administrator merupakan pemilik dan pengelola utama situs web.
