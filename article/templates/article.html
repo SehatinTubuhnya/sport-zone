@@ -1,11 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
 <title>{{ title }}</title>
-<h1>Hello</h1>
+<h1>{{ title }}</h1>
 
-<a href="{% url 'main:create_news' %}">
+<a href="{% url 'article:create_news' %}">
   <button>+ Add News</button>
 </a>
+
+{% if user.is_authenticated %}
+<a href="{% url 'account:logout' %}">
+  <button>Logout</button>
+</a>
+<br>
+<p>Current user : {{ username }}</p>
+{% else %}
+<a href="{% url 'account:login' %}">
+  <button>Login</button>
+</a>
+{% endif %}
 
 <hr>
 
@@ -15,7 +27,7 @@
 
 {% for news in news_list %}
 <div>
-  <h2><a href="{% url 'main:show_news' news.id %}">{{ news.title }}</a></h2>
+  <h2><a href="{% url 'article:show_news' news.id %}">{{ news.title }}</a></h2>
 
   <p><b>{{ news.get_category_display }}</b>{% if news.is_featured %} | 
     <b>Featured</b>{% endif %}{% if news.is_news_hot %} | 
@@ -29,7 +41,21 @@
 
   <p>{{ news.content|truncatewords:25 }}...</p>
 
-  <p><a href="{% url 'main:show_news' news.id %}"><button>Read More</button></a></p>
+  <p><a href="{% url 'article:show_news' news.id %}"><button>Read More</button></a>
+    {% if user.is_authenticated and news.user == user %}
+    <a href="{% url 'article:edit_news' news.pk %}">
+        <button>
+            Edit
+        </button>
+    </a>
+    <a href="{% url 'article:delete_news' news.pk %}">
+      <button>
+          Delete
+      </button>
+    </a>
+    {% endif %}
+  </p>
+
 </div>
 
 <hr>

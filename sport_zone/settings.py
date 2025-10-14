@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [
     ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "andrew-wanarahardja-sport-zone.pbp.cs.ui.ac.id",
+    "https://andrew-wanarahardja-sport-zone.pbp.cs.ui.ac.id",
 ]
 
 # Application definition
@@ -52,7 +52,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'article',
+    'account',
 ]
+
+AUTH_USER_MODEL = 'account.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

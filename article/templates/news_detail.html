@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<p><a href="{% url 'main:show_main' %}"><button>← Back to News List</button></a></p>
+<p><a href="{% url 'article:show_article' %}"><button>← Back to News List</button></a></p>
 
 <h1>{{ news.title }}</h1>
 <p><b>{{ news.get_category_display }}</b>{% if news.is_featured %} | 
@@ -12,6 +12,7 @@
 <img src="{{ news.thumbnail }}" alt="News thumbnail" width="300">
 <br /><br />
 {% endif %}
+<p>Author : {{ news.user.username }}</p>
 
 <p>{{ news.content }}</p>
 
