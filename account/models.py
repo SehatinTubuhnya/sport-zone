@@ -3,10 +3,6 @@ from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
 class CustomUser(AbstractUser):
-    CATEGORY_CHOICES = [
-        ('admin', 'Admin'),
-        ('author', 'Author'),
-        ('seller', 'Seller'),
-        ('user', 'User')
-    ]
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='user')
+    is_admin = models.BooleanField(null=False)
+    is_author = models.BooleanField(null=False)
+    is_seller = models.BooleanField(null=False)
