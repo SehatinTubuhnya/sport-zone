@@ -1,0 +1,32 @@
+<a href="{% url 'main:create_products' %}">
+  <button>+ Add Products</button>
+</a>
+
+<hr>
+
+{% if not products_list %}
+<p>Produk Belum Tersedia Pada Halaman InI.</p>
+{% else %}
+
+{% for products in products_list %}
+<div>
+  <h2><a href="{% url 'main:show_products' products.id %}">{{ products.title }}</a></h2>
+
+  <p><b>{{ products.get_category_display }}</b>{% if products.is_featured %} | 
+    <b>Featured</b>{% endif %}{% if products.is_products_hot %} | 
+    <b>Hot</b>{% endif %} | <i>{{ products.created_at|date:"d M Y H:i" }}</i> 
+
+  {% if products.thumbnail %}
+  <img src="{{ products.thumbnail }}" alt="thumbnail" width="150" height="100">
+  <br />
+  {% endif %}
+
+  <p>{{ products.content|truncatewords:25 }}...</p>
+
+  <p><a href="{% url 'main:show_products' products.id %}"><button>Product Detail</button></a></p>
+</div>
+
+<hr>
+{% endfor %}
+
+{% endif %}
