@@ -2,7 +2,7 @@ name: Push to PWS
 
 on:
   push:
-    master
+    branches: master
 
 jobs:
   build-and-push:
