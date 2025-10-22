@@ -1,7 +1,36 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load static %}
+{% block meta %}
 <title>{{ title }}</title>
-<h1>{{ title }}</h1>
+{% endblock meta %}
+{% block content %}
+<div class="bg-gray-900 w-full h-full p-6">
+  <!-- head picture -->
+  <div class="bg-cover w-full h-[200px]"
+    style="background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230518/pngtree-red-sports-car-on-the-track-image_2530670.jpg')">
+     <div class="bg-white/30 backdrop-blur-sm p-5">
+       <div class="absolute inset-0 bg-black opacity-50"></div>
+          <div class="relative z-10 flex items-center justify-center h-full">
+            <div class="w-40 h-40">
+              <img src="{% static 'image/logo.png' %}" alt="No product available" class="w-full h-full object-contain">
+            </div>
+          </div>
+        </div>
+      </div>
+    <div>
+  </div>
+
+  <div class="mt-6 flex flex-row justify-between">
+     <div><h1 class="text-yellow-400 text-4xl font-serif" style="font-family: 'Times New Roman', Times, serif;">Latest Articles</h1></div>
+     <div class="w-full flex items-center"><hr class="border-2 border-yellow-400 w-full"></div>
+  </div>
+
+  <div>
+    
+  </div>
+</div>
+
+<!-- <h1>{{ title }}</h1>
 
 <a href="{% url 'article:create_news' %}">
   <button>+ Add News</button>
@@ -61,5 +90,5 @@
 <hr>
 {% endfor %}
 
-{% endif %}
+{% endif %} -->
 {% endblock content %}
