@@ -115,7 +115,7 @@ def get_products_api(request: HttpRequest):
 
     query = request.GET.get("query")
     if query:
-        products = products.filter(Q(name__icontains=query) | Q(description__icontains=query) | Q(category__icontains=query))
+        products = products.filter(Q(name__icontains=query) | Q(description__icontains=query) | Q(category__icontains=query) | Q(user__username__icontains=query))
 
     per_page = request.GET.get("per_page") or "20"
 
