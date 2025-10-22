@@ -1,7 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpRequest, JsonResponse
-from django.core.paginator import Paginator, PageNotAnInteger
+from django.core.paginator import Paginator
+from django.db.models import Q
+
 from account.models import CustomUser
+from product.models import Product
+
 from .models import ActionLog
 from .utils import admin_only
 
@@ -101,17 +105,68 @@ def delete_account_api(request: HttpRequest):
     account.delete()
     return JsonResponse({"status": "success"}, safe=False)
 
+@admin_only(redirect="/")
+def products_page(request: HttpRequest):
+    return render(request, "admin/products.html", {})
+
 @admin_only()
 def get_products_api(request: HttpRequest):
-    ...
+    products = Product.objects
+
+    query = request.GET.get("query")
+    if query:
+        products = products.filter(Q(name__icontains=query) | Q(description__icontains=query) | Q(category__icontains=query))
+
+    per_page = request.GET.get("per_page") or "20"
+
+    try:
+        per_page = int(per_page)
+
+        if per_page < 1:
+            per_page = 20
+    except:
+        per_page = 20
+
+    products = products.order_by("name").all()
+    paginator = Paginator(products, per_page=per_page)
+
+    page = request.GET.get("page")
+    datas = paginator.get_page(page)
+
+    return JsonResponse(datas, safe=False)
 
 @admin_only()
 def edit_product_api(request: HttpRequest):
-    ...
+    product_id = request.POST.get("id")
+    name = request.POST.get("name")
+    description = request.POST.get("description")
+    price = request.POST.get("price")
+    category = request.POST.get("category")
+    is_featured = request.POST.get("is_featured") == "true"
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Product not found."}, safe=False)
+
+    product.name = name
+    product.description = description
+    product.price = price
+    product.category = category
+    product.is_featured = is_featured
+    product.save()
+
+    return JsonResponse({"status": "success"}, safe=False)
 
 @admin_only()
 def delete_product_api(request: HttpRequest):
-    ...
+    ids = request.POST.getlist("ids")
+    Product.objects.filter(id__in=ids).delete()
+    return JsonResponse({"status": "success"}, safe=False)
+
+@admin_only(redirect="/")
+def action_logs_page(request: HttpRequest):
+    return render(request, "admin/action_logs.html", {})
 
 @admin_only()
 def get_action_logs_api(request: HttpRequest):
@@ -144,7 +199,3 @@ def delete_action_log_api(request: HttpRequest):
 def purge_action_logs_api(request: HttpRequest):
     ActionLog.objects.all().delete()
     return JsonResponse({"status": "success"}, safe=False)
-
-@admin_only(redirect="/")
-def action_logs_page(request: HttpRequest):
-    return render(request, "admin/action_logs.html", {})
