@@ -25,8 +25,5 @@ class Product(models.Model):
         return self.name
 
 
-    @property
-    def is_products_hot(self):
-        return self.products_views > 20
-
+  
 
