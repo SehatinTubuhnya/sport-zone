@@ -43,7 +43,7 @@ def show_article(request):
         'news_list' : news_list,
         'username' : request.user.username,
     }
-    return render(request, "article_list_temp.html", context)
+    return render(request, "article.html", context)
 
 def create_news(request):
     form = NewsForm(request.POST or None)
@@ -117,10 +117,11 @@ def add_news_entry_ajax(request):
     title = strip_tags(request.POST.get("title")) # strip HTML tags!
     content = strip_tags(request.POST.get("content"))
     category = request.POST.get("category")
-    sports_type = strip_tags(request.POST.get("sports_type"))
+    sports_type = strip_tags(request.POST.get("type"))
     thumbnail = strip_tags(request.POST.get("thumbnail"))
     is_featured = request.POST.get("is_featured") == 'on'  # checkbox handling
     user = request.user
+    print(sports_type)
 
     new_product = News(
         title=title, 
@@ -167,3 +168,13 @@ def get_news_entry_ajax(request, news_id):
         })
     except News.DoesNotExist:
         return JsonResponse({'error': 'News not found'}, status=404)
+    
+@require_POST
+@csrf_exempt
+def delete_news_entry_ajax(request, product_id):
+    try:
+        product = News.objects.get(id=product_id, user=request.user)
+        product.delete()
+        return JsonResponse({'success': True})
+    except News.DoesNotExist:
+        return JsonResponse({'error': 'Product not found'}, status=404)

@@ -244,7 +244,7 @@
         const cardElement = buildNewsCardElement(news);
         if (news.fields.is_featured) {
           featuredGridContainer.appendChild(cardElement);
-        } else if (news.fields.is_news_hot()) {
+        } else if (news.fields.news_views > 20) {
           hotGridContainer.appendChild(cardElement);
         } else {
           exploreGridContainer.appendChild(cardElement);
@@ -336,7 +336,7 @@
 
       if (!newsId) return;
       try {
-        const response = await fetch(`/delete-news-ajax/${newsId}/`, {
+        const response = await fetch(`/articles/delete-news-ajax/${newsId}`, {
           method: 'POST'
         });
         
@@ -362,9 +362,11 @@
           event.preventDefault();
           newsId = this.getAttribute('data-id');
           console.log(newsId)
+          console.log("Fetching:", `/articles/get-news-ajax/${newsId}/`);
 
-          const response = await fetch(`/get-news-ajax/${newsId}`);
+          const response = await fetch(`/articles/get-news-ajax/${newsId}`);
           const news = await response.json();
+          console.log(news.sports_type);
 
           document.getElementById('editTitle').value = news.title;
           document.getElementById('editContent').value = news.content;
@@ -383,7 +385,7 @@
       try{
         const form = document.getElementById('newsEditForm');
         const formData = new FormData(form);
-        const response = await fetch(`/edit-news-ajax/${newsId}`, {
+        const response = await fetch(`/articles/edit-news-ajax/${newsId}`, {
           method: 'POST',
           body: formData
         })
