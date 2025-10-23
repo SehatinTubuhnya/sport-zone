@@ -11,6 +11,19 @@ from django.urls import reverse
 
 
 # Create your views here.
+def edit_products(request, id):
+    products = get_object_or_404(News, pk=id)
+    form = ProductsForm(request.POST or None, instance=products)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_product')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_products.html", context)
+
 def show_article(request):
     news_list = News.objects.all()
     context = {
