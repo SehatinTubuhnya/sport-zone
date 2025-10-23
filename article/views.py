@@ -18,7 +18,7 @@ def show_article(request):
         'news_list' : news_list,
         'username' : request.user.username,
     }
-    return render(request, "article.html", context)
+    return render(request, "article_list_temp.html", context)
 
 def create_news(request):
     form = NewsForm(request.POST or None)

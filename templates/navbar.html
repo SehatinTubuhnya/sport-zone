@@ -8,10 +8,10 @@
       <p class="flex-grow-0 flex-shrink-0 text-lg font-normal text-left text-black">SportZone</p>
     </div>
     <div class="flex justify-center items-center relative gap-5">
-      <a>Home</a>
-      <a>Artikel</a>
-      <a>Produk</a>
-      <a>Post</a>
+      <a href="{% url 'main:home' %}">Home</a>
+      <a href="{% url 'article:show_article' %}">Artikel</a>
+      <a href="{% url 'product:show_products_list' %}">Produk</a>
+      <a href="">Post</a>
     </div>
     <div
       class="flex justify-end items-center gap-2"

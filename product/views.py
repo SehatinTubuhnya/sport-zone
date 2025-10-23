@@ -7,6 +7,9 @@ from .models import Product
 from django.core import serializers
 from django.http import HttpResponse
 
+def show_products_list(request):
+    return render(request, "main-product.html", {})
+
 def create_products(request):
     form = ProductForm(request.POST or None)
 
