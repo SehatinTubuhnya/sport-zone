@@ -27,6 +27,9 @@ def edit_products(request, id):
 
     return render(request, "edit_products.html", context)
 
+def show_products_list(request):
+    return render(request, "main-product.html", {})
+
 def create_products(request):
     form = ProductForm(request.POST or None)
 
