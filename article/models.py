@@ -18,6 +18,7 @@ class News(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='update')
+    sports_type = models.CharField(default='General')
     thumbnail = models.URLField(blank=True, null=True)
     news_views = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
