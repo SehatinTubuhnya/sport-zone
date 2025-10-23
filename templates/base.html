@@ -6,13 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>  
+    <link rel="stylesheet" href="{% static 'css/global.css' %}" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
     {% block meta %} {% endblock meta %}
 </head>
 
-<body>
+<body class="font-['Poppins']">
+    {% include 'navbar.html' %}
     {% block content %} {% endblock content %}
     {% include 'modal.html' %}
     {% include 'toast.html' %}
+    {% include 'footer.html' %}
 </body>
 </html>

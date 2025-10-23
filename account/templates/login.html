@@ -5,28 +5,49 @@
 {% endblock meta %}
 
 {% block content %}
-<div class="login">
-  <h1>Login</h1>
+<div class="bg-gray-100">
+  <div class="min-h-screen flex items-center justify-center">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+      
+      <h1 class="text-4xl font-bold text-center text-black mb-2">
+        SportZone
+      </h1>
 
-  <form method="POST" action="">
-    {% csrf_token %}
-    <table>
-      {{ form.as_table }}
-      <tr>
-        <td></td>
-        <td><input class="btn login_btn" type="submit" value="Login" /></td>
-      </tr>
-    </table>
-  </form>
+      <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">
+        Login
+      </h2>
 
-  {% if messages %}
-  <ul>
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %} Don't have an account yet?
-  <a href="{% url 'account:register' %}">Register Now</a>
+      <form action="#" method="POST" class="space-y-4">
+        <div>
+          <label for="username" class="block text-sm font-medium text-gray-700">
+            Username or Email
+          </label>
+          <input type="text" id="username" name="username" 
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm">
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <input type="password" id="password" name="password" 
+                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black sm:text-sm">
+        </div>
+
+        <button type="submit" 
+                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition">
+          Login
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-gray-600 mt-6">
+        Don't have an account? 
+        <a href="#" class="font-medium text-black hover:underline">
+          Register here.
+        </a>
+      </p>
+
+    </div>
+  </div>
 </div>
-
 {% endblock content %}
