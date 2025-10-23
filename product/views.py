@@ -18,7 +18,7 @@ def create_products(request):
     return render(request, "create_products.html", context)
 
 def show_products(request, id):
-    products = get_object_or_404(News, pk=id)
+    products = get_object_or_404(Product, pk=id)
 
     return render(request, "products_detail.html")
 
