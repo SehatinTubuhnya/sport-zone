@@ -6,6 +6,26 @@ from .forms import ProductForm
 from .models import Product
 from django.core import serializers
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+def delete_products(request, id):
+    products = get_object_or_404(Product, pk=id)
+    products.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))
+
+def edit_products(request, id):
+    products = get_object_or_404(Product, pk=id)
+    form = ProductForm(request.POST or None, instance=products)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_product')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_products.html", context)
 
 def show_products_list(request):
     return render(request, "main-product.html", {})
