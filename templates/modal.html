@@ -144,8 +144,8 @@
     </div>
      <!-- submitNews -->
     <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
-      <button type="button" id="cancelEdit" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50 transition-colors text-center" onclick="hideEditModal()">Cancel</button>
-      <button type="submit" id="submitEdit" form="newsEditForm" class="order-1 sm:order-2 flex-1 bg-cyan-500 text-white px-6 py-3 rounded-md font-medium hover:bg-cyan-700 transition-colors">Edit News</button>
+      <button type="button" id="cancelEdit" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors text-center" onclick="hideEditModal()">Cancel</button>
+      <button type="submit" id="submitEdit" form="newsEditForm" class="order-1 sm:order-2 flex-1 bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 transition-colors">Edit Artikel</button>
     </div>
   </div>
   <div id="read">
@@ -238,7 +238,6 @@
         
     // Show toast notification
     showToast('News added successfully!', '', 'success');
-    console.log('here');
     // Dispatch custom event to notify main.html about new data
     document.dispatchEvent(new CustomEvent('newsAdded'));
 

@@ -24,17 +24,11 @@
       </div>
   </div>
 <div class="bg-white w-full h-full p-6">
-  <!-- <div class="mt-6 flex flex-row justify-between">
-     <div><h1 class="text-yellow-400 text-4xl font-serif" style="font-family: 'Times New Roman', Times, serif;">Latest Articles</h1></div>
-     <div class="w-full flex items-center"><hr class="border-2 border-yellow-400 w-full"></div>
-  </div> -->
-
   <div class="flex flex col items-center justify between w-full mb-4 gap-x-4">
     <div id="create"></div>
   </div>
 
   <!-- Loading State -->
-  <!-- i changed some colors (svg class, circle class stroke, path class fill) here -->
   <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
     <svg class="animate-spin h-8 w-8 text-cyan-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="cyan-500" stroke-width="4"></circle>
@@ -105,7 +99,6 @@
   const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
   const IS_AUTHOR = "{{ user.is_author|lower }}" === 'true';
   const IS_ADMIN = "{{ user.is_admin|lower }} " === 'true';
-  console.log(IS_AUTHOR || IS_ADMIN);
 
   window.onload = function() {
     const loadingSpinner = document.getElementById('loading');
@@ -310,23 +303,6 @@
       });
     }
 
-    // logoutBtn.addEventListener('click', async function (event) {
-    //   event.preventDefault();
-    //   console.log("clicked")
-    //   const response = await fetch("{% url 'account:logout' %}");
-    //   const data = await response.json();
-    //   console.log(data.success)
-    //   if (data.success == 'Successful logout') {
-    //     showToast('logged out successfully!','','success');
-    //     setTimeout(() => {
-    //       window.location.href = data.redirect;
-    //     }, 3000);
-    //   } else {
-    //     alert("sum ting wong")
-    //   }
-    // })
-  
-
     confirmDelete.addEventListener('click', async function(event) {
       event.preventDefault();
 
@@ -357,12 +333,9 @@
         button.addEventListener('click', async function(event) {
           event.preventDefault();
           newsId = this.getAttribute('data-id');
-          console.log(newsId)
-          console.log("Fetching:", `/articles/get-news-ajax/${newsId}/`);
 
           const response = await fetch(`/articles/get-news-ajax/${newsId}`);
           const news = await response.json();
-          console.log(news.sports_type);
 
           document.getElementById('editTitle').value = news.title;
           document.getElementById('editContent').value = news.content;
@@ -423,15 +396,8 @@
         fetchNewsFromServer();
     });
 
-    // refresh.addEventListener("click", () => {
-    //   fetchNewsFromServer();
-    // });
-
     // Initialize page
     function initializeNewsPage() {
-      // showAllNewsButton.addEventListener('click', handleShowAllNewsClick);
-      // showMyNewsButton.addEventListener('click', handleShowMyNewsClick);
-      // showFeaturedButton.addEventListener('click', handleShowFeaturedClick);
       fetchNewsFromServer();
     }
 
