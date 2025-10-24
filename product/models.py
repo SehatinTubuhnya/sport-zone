@@ -19,7 +19,6 @@ class Product(models.Model):
     is_featured = models.BooleanField(default=False)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
 
-
     def __str__(self):
         return self.name
 

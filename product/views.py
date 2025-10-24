@@ -150,7 +150,8 @@ def product_create_view(request):
             price=int(request.POST.get('price')),
             category=request.POST.get('category'),
             description=request.POST.get('description'),
-            thumbnail=request.POST.get('thumbnail', None) or None
+            thumbnail=request.POST.get('thumbnail', None) or None,
+            is_featured=request.POST.get('is_featured', 'no') == "on"
         )
         if not new_product.name or not new_product.price or not new_product.category or not new_product.description:
             return HttpResponseBadRequest(json.dumps({'error': 'Semua field wajib (kecuali thumbnail) harus diisi.'}), content_type='application/json')
@@ -187,6 +188,7 @@ def product_detail_view(request, pk):
         'category': product.category,
         'description': product.description,
         'thumbnail': product.thumbnail or '',
+        'is_featured': product.is_featured
     }
     return JsonResponse(data)
 
@@ -212,11 +214,13 @@ def product_update_view(request, pk):
     try:
         # Karena ini POST, data ada di request.POST. Ini lebih sederhana!
         data = request.POST
+        print(data.get('is_featured'))
         product.name = data.get('name')
         product.price = int(data.get('price'))
         product.category = data.get('category')
         product.description = data.get('description')
         product.thumbnail = data.get('thumbnail', None) or None
+        product.is_featured = data.get('is_featured', 'no') == 'on'
         
         if not product.name or not product.price or not product.category or not product.description:
             return HttpResponseBadRequest(json.dumps({'error': 'Semua field wajib (kecuali thumbnail) harus diisi.'}), content_type='application/json')
