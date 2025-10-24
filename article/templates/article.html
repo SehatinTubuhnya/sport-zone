@@ -34,7 +34,8 @@
 
   <!-- erase this later -->
   <div class="flex flex col items-center justify left mb-4">
-    <button id="create" class="bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded transition-colors mx-2">Create News</button>
+    
+    <div id="create"></div>
     {% if user.is_authenticated %}
     <a href="{% url 'account:logout' %}"><button id="logout" class="bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded transition-colors mx-4">Logout</button></a>
     <h1>User : {{ username }}</h1>
@@ -135,10 +136,10 @@
     const refresh = document.getElementById('refresh');
     const confirmDelete = document.getElementById('confirmDelete');
     const submitEdit = document.getElementById('submitEdit');
+    const createBtn = document.getElementById('create');
 
     // temporaryDOM, erase later
     const logoutBtn = document.getElementById('logout');
-    const createBtn = document.getElementById('create');
 
     // State Variables
     let activeFilter = 'all';
@@ -168,7 +169,7 @@
     function buildNewsCardElement(news) {
       const data = news.fields
       const articleElement = document.createElement('article');
-      articleElement.className = 'bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full';
+      articleElement.className = 'bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full transition-transform duration-300 hover:-translate-y-2';
 
       const detailLink = `{% url 'article:show_detail' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
       const editLink = `{% url 'article:edit_article' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
@@ -238,6 +239,10 @@
       featuredGridContainer.innerHTML = '';
       hotGridContainer.innerHTML = '';
       exploreGridContainer.innerHTML = '';
+      createBtn.innerHTML = `
+        <div class="m-4 rounded"> 
+          
+        </div>`
       articles.forEach(news => {
         const cardElement = buildNewsCardElement(news);
         if (news.fields.is_featured) {

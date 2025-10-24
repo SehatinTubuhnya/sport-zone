@@ -67,9 +67,7 @@
                     </span>
                 </div>
 
-                <div id="editDeleteBtn">
-                    
-                </div>
+                <div id="editDeleteBtn"></div>
             </div>
 
             <!-- Featured Image -->
@@ -122,6 +120,9 @@
 const NEWS_ID = "{{ news.id }}";
 const NEWS_DETAIL_ENDPOINT = `{% url 'article:show_json_by_id' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', NEWS_ID);
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+const IS_ADMIN = "{{ user.is_admin }}";
+const IS_AUTHOR = "{{ user.is_author }}";
+const USERNAME = "{{ user.username }}";
 
 window.onload = function() {
     // DOM Elements
