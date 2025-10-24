@@ -57,6 +57,7 @@
                     <div id="author">
 
                     </div>
+                    <span>  |  </span>
                     <time id="posted-date">
                         <!-- Date will be inserted here -->
                     </time>
@@ -89,17 +90,29 @@
                 </div>
             </div>
 
-            <!-- Author Info -->
-            <div class="border-t border-gray-200 p-6 sm:p-8 bg-gray-50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <div class="font-medium text-gray-900">
-                            <p id="article-author">Seller: Loading...</p>
+            <!-- write comments -->
+            <div class="border-t border-gray-200 p-6 sm:p-8 bg-white">
+                <div class="font-medium text-gray-900 mb-4">
+                    <p class="text-2xl">Komentar</p>
+                </div>
+
+                <div class="w-full bg-gray-100 rounded shadow-sm border border-gray-200 mb-6 p-4">
+                    <div class="flex flex-row">
+                        <img src="https://placehold.co/40x40/E0E0E0/333333?text=Me" class="w-10 h-10 rounded-full mr-4" alt="My Avatar">
+                        <div class="w-full">
+                            <form id="commentForm">
+                                <textarea id="writeComment" rows="3" name="content" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black" placeholder="Tulis komentar Anda..."></textarea>
+                            </form>
+                            <button type="button" id="submitComment" form="commentForm" class="mt-2 bg-black text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
+                                Kirim
+                            </button>
                         </div>
-                        <p class="text-sm text-gray-500">Seller</p>
                     </div>
                 </div>
             </div>
+
+            <!-- posted comments -->
+            <div id="commentCards"></div>
         </article>
     </div>
 </div>
@@ -127,7 +140,7 @@ window.onload = function() {
     const articleAuthor = document.getElementById('article-author');
     const editDeleteBtn = document.getElementById('editDeleteBtn');
     const submitEdit = document.getElementById('submitEdit');
-
+    const commentCards = document.getElementById('commentCards');
 
 
     // Show/hide page sections
@@ -205,20 +218,16 @@ window.onload = function() {
             : '';
         editDeleteBtn.innerHTML = editDeleteButtons;
 
-        console.log("here");
+
         let newsId = null;
         function attachEditEventListeners() {
             document.querySelectorAll('.editNews').forEach(button => {
                 button.addEventListener('click', async function(event) {
                     event.preventDefault();
-                    console.log(this);
                     newsId = news[0].pk;
-                    console.log(newsId)
-                    console.log("Fetching:", `/articles/get-news-ajax/${newsId}/`);
 
                     const response = await fetch(`/articles/get-news-ajax/${newsId}`);
                     const article = await response.json();
-                    console.log(article.sports_type);
 
                     document.getElementById('editTitle').value = article.title;
                     document.getElementById('editContent').value = article.content;
@@ -233,7 +242,6 @@ window.onload = function() {
 
         submitEdit.addEventListener('click', async function (event) {
             event.preventDefault();
-            console.log("There");
             if(!newsId) return;
             try{
                 const form = document.getElementById('newsEditForm');
@@ -301,10 +309,8 @@ window.onload = function() {
         newsContent.textContent = data.content;
         
         // Set author
-        console.log("username in : " + username);
         const authorName = username || 'Anonymous';
         author.textContent = `Penulis : ${authorName}`;
-        articleAuthor.textContent = `Seller: ${authorName}`;
     }
 
     async function getUsername(id) {
@@ -316,6 +322,16 @@ window.onload = function() {
         return "Anonymous";
     } 
 
+    async function getComments(id) {
+        const response = await fetch (`/articles/get-comment-by-id/${id}`);
+        if (response.ok) {
+            const comments = await response.json();
+            console.log(comments);
+            return comments;
+        }
+        return;
+    }
+
     // Fetch news detail
     async function loadNewsDetail() {
         try {
@@ -325,14 +341,13 @@ window.onload = function() {
                 headers: { 'Accept': 'application/json' },
             });
             
-            console.log(response);
             if (!response.ok) {
                 throw new Error('Failed to fetch news details');
             }
             
             const newsData = await response.json();
             const username = await getUsername(newsData[0].fields.user);
-            console.log("username : " + username);
+
             renderArticle(newsData, username);
             showState('ready');
         } catch (error) {
@@ -341,8 +356,92 @@ window.onload = function() {
         }
     }
 
+    function buildCommentCard(comment) {
+        const commentElement = document.createElement('comment');
+        const username = comment.fields.username;
+        const content = comment.fields.content;
+        const formattedDate = new Date(comment.fields.created_at).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // <img or div> 
+        // make the profile picture h-10 w-10 there later
+        const completeCardHtml = `
+            <div class="m-4 p-4 rounded-md border border-1 border-gray-600 hover:shadow-md transition-transform duration-300 hover:-translate-y-1">
+                <div flex flex row>
+                    <div class="w-full flex flex-row justify-between">
+                        <p class="text-lg text-black" mx-3>${username}</p>
+                        <p class="text-lg text-gray-600 italic mx-3">${formattedDate}</p>
+                    </div>
+                    <hr bg-gray-600 border border-0>
+                    <p class="text-lg text-black mt-4">${content}</p>
+                </div>
+            </div>
+        `
+        commentElement.innerHTML = completeCardHtml;
+        return commentElement;
+    }
+
+    function renderAllComments(comments) {
+        commentCards.innerHTML = '';
+        comments.forEach(comment => {
+            const commentCard = buildCommentCard(comment);
+            commentCards.append(commentCard);
+        })
+    }
+
+    async function addComment() {
+        newsId = NEWS_ID
+        await fetch(`/articles/add-comment-ajax/${newsId}`, {
+        method: "POST",
+        body: new FormData(document.querySelector('#commentForm')),
+        })
+
+        document.getElementById("commentForm").reset();
+        // hideModal();
+            
+        // Show toast notification
+        showToast('Comment added successfully!', '', 'success');
+        // Dispatch custom event to notify main.html about new data
+        document.dispatchEvent(new CustomEvent('commentAdded'));
+
+        return false;
+    }
+
+    document.getElementById("submitComment").addEventListener("click", function(e) {
+        e.preventDefault();
+        addComment();
+    })
+
+    async function loadComments() {
+        try {
+            showState('loading');
+            const response = await fetch(NEWS_DETAIL_ENDPOINT, {
+                headers: { 'Accept': 'application/json' },
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch news details');
+            }
+            const newsData = await response.json();
+            const comments = await getComments(newsData[0].pk) || [];
+            renderAllComments(comments)
+            showState('ready');
+        } catch (error) {
+            console.error('Error loading comments : ', error);
+            showState('error');
+        }
+    }
+    
+    // document.addEventListener('commentAdded')
+
     // Initialize page
     loadNewsDetail();
+    loadComments();
 }
 </script>
 

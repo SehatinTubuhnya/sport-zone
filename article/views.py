@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from article.forms import NewsForm
-from article.models import News
+from article.models import News, Comment
 
 from django.http import HttpResponse
 from django.core import serializers
@@ -91,6 +91,14 @@ def show_json_by_id(request, news_id):
    try:
        news_item = News.objects.get(pk=news_id)
        json_data = serializers.serialize("json", [news_item])
+       return HttpResponse(json_data, content_type="application/json")
+   except News.DoesNotExist:
+       return HttpResponse(status=404)
+   
+def show_comment_json_by_news_id(request, news_id):
+   try:
+       comments = Comment.objects.filter(news_id=news_id).order_by('-created_at')
+       json_data = serializers.serialize("json", comments)
        return HttpResponse(json_data, content_type="application/json")
    except News.DoesNotExist:
        return HttpResponse(status=404)
@@ -187,3 +195,20 @@ def get_username_by_id(request, id):
         return JsonResponse({"id": user.id, "username": user.username})
     except CustomUser.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
+    
+@csrf_exempt
+@require_POST
+def add_comment_entry_ajax(request, news_id):
+    content = strip_tags(request.POST.get("content"))
+    user = request.user
+    username = request.user.username
+    news = News.objects.get(pk=news_id)
+
+    new_comment = Comment(
+        content=content,
+        user=user,
+        username=username,
+        news=news
+    )
+    new_comment.save()
+    return HttpResponse(b"CREATED", status=201)

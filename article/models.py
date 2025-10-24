@@ -38,6 +38,8 @@ class News(models.Model):
 class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    username = models.CharField(max_length=100, default='')
     news = models.ForeignKey(News, on_delete=models.CASCADE, null=True)
