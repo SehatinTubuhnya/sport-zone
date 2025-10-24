@@ -1,65 +1,408 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load static %}
+{% block meta %}
 <title>{{ title }}</title>
-<h1>{{ title }}</h1>
+{% endblock meta %}
+{% block content %}
+<!-- head picture -->
+  <div class="w-full h-[120px] relative">
+    <img src="{% static 'images/header-img.png' %}" alt="Header Banner" class="w-full h-full object-cover" />
+     <div class="bg-white/30 backdrop-blur-sm p-3 absolute inset-0 w-full h-[120px]">
+       <div class="absolute inset-0 bg-black opacity-50"></div>
+          <div class="relative z-10 flex items-center justify-center h-full">
+            <div class="flex items-center justify-center ">
+              <div class="w-20 h-20 mx-2">
+                <img src="{% static 'image/logo.png' %}" alt="No logo available" class="w-full h-full object-contain">
+              </div>
+              <div class="text-white">
+                <p class="text-2xl font-bold">SportZone</p>
+                <p>Satu Zona untuk Semua Hal Tentang Olahraga</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+<div class="bg-white w-full h-full p-6">
+  <div class="flex flex col items-center justify between w-full mb-4 gap-x-4">
+    <div id="create"></div>
+  </div>
 
-<a href="{% url 'article:create_news' %}">
-  <button>+ Add News</button>
-</a>
+  <!-- Loading State -->
+  <div id="loading" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+    <svg class="animate-spin h-8 w-8 text-cyan-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="cyan-500" stroke-width="4"></circle>
+      <path class="opacity-75" fill="cyan-500" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+    </svg>
+    <p class="text-gray-600 mt-3">Loading news...</p>
+  </div>
 
-{% if user.is_authenticated %}
-<a href="{% url 'account:logout' %}">
-  <button>Logout</button>
-</a>
-<br>
-<p>Current user : {{ username }}</p>
-{% else %}
-<a href="{% url 'account:login' %}">
-  <button>Login</button>
-</a>
-{% endif %}
+  <!-- Error State -->
+  <div id="error" class="hidden"></div>
 
-<hr>
+  <!-- News Grid -->
+  <div id="grid" class="hidden">
+    <!-- artikel trending (featured) -->
+    <div class="mb-4">
+      <!-- judul -->
+      <div class="text-black text-xl font-semibold mb-2"><p>ARTIKEL TRENDING</p></div>
 
-{% if not news_list %}
-<p>Belum ada data berita pada football news.</p>
-{% else %}
+      <!-- divider -->
+      <div><hr class="border-black w-full mb-4"></div>
 
-{% for news in news_list %}
-<div>
-  <h2><a href="{% url 'article:show_news' news.id %}">{{ news.title }}</a></h2>
+      <!-- cards -->
+      <div id="featuredGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </div>
 
-  <p><b>{{ news.get_category_display }}</b>{% if news.is_featured %} | 
-    <b>Featured</b>{% endif %}{% if news.is_news_hot %} | 
-    <b>Hot</b>{% endif %} | <i>{{ news.created_at|date:"d M Y H:i" }}</i> 
-    | Views: {{ news.news_views }}</p>
+    <!-- artikel terbaru -->
+    <div class="mb-4">
+      <!-- judul -->
+      <div class="text-black text-xl font-semibold mb-2"><p>ARTIKEL HOT</p></div>
 
-  {% if news.thumbnail %}
-  <img src="{{ news.thumbnail }}" alt="thumbnail" width="150" height="100">
-  <br />
-  {% endif %}
+      <!-- divider -->
+      <div><hr class="border-black w-full mb-4"></div>
 
-  <p>{{ news.content|truncatewords:25 }}...</p>
+      <!-- cards -->
+      <div id="hotGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </div>
 
-  <p><a href="{% url 'article:show_news' news.id %}"><button>Read More</button></a>
-    {% if user.is_authenticated and news.user == user %}
-    <a href="{% url 'article:edit_news' news.pk %}">
-        <button>
-            Edit
-        </button>
-    </a>
-    <a href="{% url 'article:delete_news' news.pk %}">
-      <button>
-          Delete
-      </button>
-    </a>
-    {% endif %}
-  </p>
+    <!-- mungkin anda tertarik -->
+    <div class="mb-4">
+      <!-- judul -->
+      <div class="text-black text-xl font-semibold mb-2"><p>JELAJAHI</p></div>
 
+      <!-- divider -->
+      <div><hr class="border-black w-full mb-4"></div>
+
+      <!-- cards -->
+      <div id="exploreGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="empty" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+    <div class="w-32 h-32 mx-auto mb-4">
+      <img src="{% static 'image/no-news.png' %}" alt="No news available" class="w-full h-full object-contain">
+    </div>
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada berita</h3>
+      <p class="text-gray-500 mb-6">Bagikan ceritamu!</p>
+      <a class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors" onclick="showModal()">
+        Buat artikel
+      </a>
+    </div>
+  </div>
 </div>
 
-<hr>
-{% endfor %}
+<script>
+  const NEWS_API_ENDPOINT = "{% url 'article:show_json' %}";
+  const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+  const IS_AUTHOR = "{{ user.is_author|lower }}" === 'true';
+  const IS_ADMIN = "{{ user.is_admin|lower }} " === 'true';
 
-{% endif %}
+  window.onload = function() {
+    const loadingSpinner = document.getElementById('loading');
+    const errorMessage = document.getElementById('error');
+    const emptyStateDisplay = document.getElementById('empty');
+    const newsGridContainer = document.getElementById('grid');
+    const hotGridContainer = document.getElementById('hotGrid');
+    const featuredGridContainer = document.getElementById('featuredGrid');
+    const exploreGridContainer = document.getElementById('exploreGrid');
+    const showAllNewsButton = document.getElementById('filter-all');
+    const showMyNewsButton = document.getElementById('filter-my');
+    const showFeaturedButton = document.getElementById('filter-featured');
+    const showCatTransferButton = document.getElementById('filter-transfer');
+    const showCatUpdateButton = document.getElementById('filter-update');
+    const showCatMatchButton = document.getElementById('filter-match');
+    const showCatRumorButton = document.getElementById('filter-rumor');
+    const showCatExclusiveButton = document.getElementById('filter-exclusive');
+    const showCatAnalysisButton = document.getElementById('filter-analysis');
+    const refresh = document.getElementById('refresh');
+    const confirmDelete = document.getElementById('confirmDelete');
+    const submitEdit = document.getElementById('submitEdit');
+    const createBtn = document.getElementById('create');
+
+    // temporaryDOM, erase later
+    const logoutBtn = document.getElementById('logout');
+
+    // State Variables
+    let activeFilter = 'all';
+    let allNewsData = [];
+
+    // Show/hide page sections
+    function displayPageSection({ showLoading = false, showError = false, showEmpty = false, showGrid = false }) {
+      loadingSpinner.classList.toggle('hidden', !showLoading);
+      errorMessage.classList.toggle('hidden', !showError);
+      emptyStateDisplay.classList.toggle('hidden', !showEmpty);
+      newsGridContainer.classList.toggle('hidden', !showGrid);
+    }
+
+    // Get readable category name
+    function getReadableCategoryName(categoryCode) {
+      const categoryMapping = {
+        update: 'Update',
+        regional: 'Regional',
+        global: 'Global',
+        antique: 'Antique',
+        special: 'Special',
+      };
+      return categoryMapping[categoryCode] || categoryCode;
+    }
+
+    // Create news card element
+    function buildNewsCardElement(news) {
+      const data = news.fields
+      const articleElement = document.createElement('article');
+      articleElement.className = 'bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full transition-transform duration-300 hover:-translate-y-2';
+
+      const detailLink = `{% url 'article:show_detail' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
+      const editLink = `{% url 'article:edit_article' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
+      const deleteLink = `{% url 'article:delete_article' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
+
+      const title = DOMPurify.sanitize(data.title);
+      const content = DOMPurify.sanitize(data.content);
+      const category = DOMPurify.sanitize(data.category);
+      const type = DOMPurify.sanitize(data.sports_type)
+      const thumbnail = DOMPurify.sanitize(data.thumbnail);
+      const createdAt = DOMPurify.sanitize(new Date(data.created_at).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+      }));
+
+      const newsViews = DOMPurify.sanitize(data.news_views);
+      const isFeatured = data.is_featured;
+      const isPopular = newsViews > 20;
+
+      const thumbnailHtml = DOMPurify.sanitize(
+            data.thumbnail ? `<img src='${thumbnail}' alt='${title}' class='w-full h-full object-cover'>` : `<div class='w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center'></div>`
+        );
+      const categoryLabel = DOMPurify.sanitize(getReadableCategoryName(category));
+        const featuredLabel = isFeatured ? DOMPurify.sanitize(`<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800'>Featured</span>`) : '';
+        const popularLabel = isPopular ? DOMPurify.sanitize(`<span class='inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-800'>Popular</span>`) : '';
+
+      const editDeleteButtons = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(data.user)
+        ? `<div class='flex space-x-2'>
+            <button data-id='${news.pk}' class=' editNews button bg-white hover:bg-gray-200 text-black text-sm transition-colors px-3 py-2 rounded onclick="showEditModal()"'>Edit</button>
+            <button data-id='${news.pk}' class=' deleteNews button bg-red-600 hover:bg-red-700 text-white hover:text-gray-100 text-sm transition-colors px-3 py-2 rounded onclick="showConfirmModal()"'>Delete</button>
+          </div>`
+        : '';
+
+      const completeCardHtml = `
+        <div class="aspect-[8/5] relative overflow-hidden">
+          ${thumbnailHtml}
+          <div class="absolute top-3 left-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 d text-xs font-medium rounded bg-green-700 text-white">${categoryLabel}</span>
+          </div>
+          <div class="absolute top-3 right-3 flex space-x-2">
+            ${featuredLabel}
+            ${popularLabel}
+          </div>
+        </div>
+        <div class="p-5 flex flex-col flex-1">
+          <div class="flex items-center text-sm text-gray-400 mb-3">
+            <span>${type}</span>
+          </div>
+          <h3 class="text-lg font-semibold text-black mb-3 line-clamp-2 leading-tight">
+            <a href="${detailLink}" class="hover:text-indigo-600 hover:underline transition-colors">${title}</a>
+          </h3>
+          
+          <div class="pt-4 border-t border-gray-600 flex items-center justify-between">
+            <time class="text-sm text-gray-400">${createdAt}</time>
+            ${editDeleteButtons}
+          </div>
+        </div>
+      `;
+
+      articleElement.innerHTML = completeCardHtml;
+      return articleElement;
+    }
+
+    // Render all news cards
+    function renderAllNewsCards(articles) {
+      featuredGridContainer.innerHTML = '';
+      hotGridContainer.innerHTML = '';
+      exploreGridContainer.innerHTML = '';
+      createBtn.innerHTML = '';
+      createBtn.innerHTML = (IS_AUTHOR || IS_ADMIN) ? `
+        <div class="m-4 w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
+          <p class="text-white">Hei kau! punya berita menarik?</p>
+          <button class="addArticle bg-white text-black hover:bg-gray-200 transition-colors px-4 py-1">Buat Artikel</button>
+        </div>` : '';
+      document.querySelectorAll(".addArticle").forEach (button => {
+        button.addEventListener('click', async function (event) {
+          event.preventDefault();
+          showModal();
+        })
+      })
+      articles.forEach(news => {
+        const cardElement = buildNewsCardElement(news);
+        if (news.fields.is_featured) {
+          featuredGridContainer.appendChild(cardElement);
+        } else if (news.fields.news_views > 20) {
+          hotGridContainer.appendChild(cardElement);
+        } else {
+          exploreGridContainer.appendChild(cardElement);
+        }
+      });
+
+      attachDeleteEventListeners();
+      attachEditEventListeners();
+    }
+
+    // Filter and display News
+    function filterAndDisplayNews() {
+      // updateFilterButtonsAppearance();
+      
+      const filteredNews = activeFilter === 'all' 
+        ? allNewsData 
+        : (activeFilter === 'my'
+        ? allNewsData.filter(news => Number(news.user_id) === Number(CURRENT_USER_ID))
+        : allNewsData.filter(news => news.is_featured === true));
+      
+      if (filteredNews.length === 0) {
+        displayPageSection({ showEmpty: true });
+      } else {
+        renderAllNewsCards(filteredNews);
+        displayPageSection({ showGrid: true });
+      }
+    }
+
+    // Fetch news data from server
+    async function fetchNewsFromServer() {
+      try {
+        displayPageSection({ showLoading: true });
+        
+        const response = await fetch(NEWS_API_ENDPOINT, {
+          headers: { 'Accept': 'application/json' },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch news data from server');
+        }
+
+        const newsData = await response.json();
+        allNewsData = newsData || [];
+        
+        filterAndDisplayNews();
+      } catch (error) {
+        console.error('Error loading news:', error);
+        displayPageSection({ showError: true });
+      }
+    }
+
+
+    let newsId = null;
+    function attachDeleteEventListeners() {
+      document.querySelectorAll('.deleteNews').forEach(button => {
+        button.addEventListener('click', async function(event) {
+          event.preventDefault();
+          newsId = this.getAttribute('data-id');
+          showConfirmModal();
+        });
+      });
+    }
+
+    confirmDelete.addEventListener('click', async function(event) {
+      event.preventDefault();
+
+      if (!newsId) return;
+      try {
+        const response = await fetch(`/articles/delete-news-ajax/${newsId}`, {
+          method: 'POST'
+        });
+        
+        if (response.ok) {
+          // Re-fetch News to refresh the grid
+          showToast('News deleted', '', 'error')
+          fetchNewsFromServer();
+        } else {
+          alert("Failed to delete news.");
+        }
+      } catch (error) {
+        console.error("Error deleting news:", error);
+        alert("Error deleting news.");
+      } finally {
+        hideConfirmModal();
+        newsId = null;
+      }
+    })
+
+    function attachEditEventListeners() {
+      document.querySelectorAll('.editNews').forEach(button => {
+        button.addEventListener('click', async function(event) {
+          event.preventDefault();
+          newsId = this.getAttribute('data-id');
+
+          const response = await fetch(`/articles/get-news-ajax/${newsId}`);
+          const news = await response.json();
+
+          document.getElementById('editTitle').value = news.title;
+          document.getElementById('editContent').value = news.content;
+          document.getElementById('editCategory').value = news.category;
+          document.getElementById('editType').value = news.sports_type;
+          document.getElementById('editThumbnail').value = news.thumbnail;
+          document.getElementById('edit_is_featured').checked = news.is_featured;
+          showEditModal();
+        })
+      })
+    }
+
+    submitEdit.addEventListener('click', async function (event) {
+      event.preventDefault();
+      if(!newsId) return;
+      try{
+        const form = document.getElementById('newsEditForm');
+        const formData = new FormData(form);
+        const response = await fetch(`/articles/edit-news-ajax/${newsId}`, {
+          method: 'POST',
+          body: formData
+        })
+
+        if (response.ok) {
+          showToast('News Edited','','success');
+          fetchNewsFromServer();
+        } else {
+          alert('failed to edit news');
+        }
+      } catch (error) {
+        console.error("Error editing news:", error);
+        alert("Error editing news.");
+      } finally {
+        hideEditModal();
+        newsId = null;
+      }
+    })
+
+    // Event handlers
+    function handleShowAllNewsClick() {
+      activeFilter = 'all';
+      filterAndDisplayNews();
+    }
+
+    function handleShowMyNewsClick() {
+      activeFilter = 'my';
+      filterAndDisplayNews();
+    }
+
+    function handleShowFeaturedClick() {
+      activeFilter = 'featured';
+      filterAndDisplayNews();
+    }
+
+    // Add event listener to detect new news
+    document.addEventListener('newsAdded', function() {
+        // Refresh data without page reload
+        fetchNewsFromServer();
+    });
+
+    // Initialize page
+    function initializeNewsPage() {
+      fetchNewsFromServer();
+    }
+
+    // Start application
+    initializeNewsPage();
+  }
+</script>
 {% endblock content %}

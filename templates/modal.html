@@ -1,0 +1,251 @@
+<!-- Modal -->
+<div id="crudModal" class="hidden fixed inset-0 z-50 w-full flex items-center justify-center bg-gray-800 bg-opacity-50">
+  <div id="crudModalContent" class="hidden bg-white rounded-lg shadow-lg w-5/6 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 max-h-screen overflow-y-auto">
+    <!-- Modal header -->
+    <div class="flex items-center justify-between p-4 border-b">
+      <div>
+        <h3 class="text-xl font-semibold text-gray-900">
+          Add News
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">Show people your interesting stuff</p>
+      </div>
+      <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="hideModal()">
+        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+    </div>
+    <!-- Modal body -->
+    <div class="px-6 py-4 space-y-6 form-style">
+      <!-- newsForm -->
+      <form id="newsForm">
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+          <input type="text" id="title" name="title" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter news title" required>
+        </div>
+
+        <div class="mb-4">
+          <!-- content -->
+          <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+          <textarea id="content" name="content" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter news content" required></textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+          <select id="category" name="category" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" required>
+            <option value="">Choose a category</option>
+            <option value="Transfer">Transfer</option>
+            <option value="Update">Update</option>
+            <option value="Exclusive">Exclusive</option>
+            <option value="Match">Match</option>
+            <option value="Rumor">Rumor</option>
+            <option value="Analysis">Analysis</option>
+          </select>
+        </div>
+
+        <!-- added type -->
+        <div class="mb-4">
+          <label for="sports_type" class="block text-sm font-medium text-gray-700">Sports Type</label>
+          <input type="text" id="type" name="type" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter the type of sports" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail URL</label>
+          <input type="url" id="thumbnail" name="thumbnail" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://example.com/image.jpg">
+        </div>
+
+        <div class="mb-4">
+          <div class="flex items-center">
+            <input id="is_featured" name="is_featured" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+            <label for="is_featured" class="ml-2 text-sm font-medium text-gray-900">Featured News</label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- submitNews -->
+    <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
+      <button type="button" id="cancelButton" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 border-[2px] text-black rounded-md font-medium bg-white hover:bg-gray-300 transition-colors text-center" onclick="hideModal()">Cancel</button>
+      <button type="submit" id="submitNews" form="newsForm" class="order-1 sm:order-2 flex-1 bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 transition-colors">Post News</button>
+    </div>
+  </div>
+
+
+  <div id="confirm" class="hidden w-400 h-200 bg-yellow-500 rounded">
+    <div class="flex flex-col items-center justify-center">
+      <div class="mx-10 mt-6 text-white text-2xl font-bold">Are you sure you want to </div>
+      <div class="text-2xl text-white font-bold mb-10">delete this news?</div>
+      <div class="mx-10 mb-6 flex flex-row justify-between" >
+        <button id="confirmDelete" class="bg-blue-800 text-white hover:bg-red-600 rounded px-3 py-1 mx-4">Delete</button>
+        <button class="bg-white text-black hover:bg-gray-200 rounded px-3 py-1 mx-4" onclick="hideConfirmModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="update" class="hidden bg-white rounded-lg shadow-lg w-5/6 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 max-h-screen overflow-y-auto">
+    <!-- Modal header -->
+    <div class="flex items-center justify-between p-4 border-b">
+      <div>
+        <h3 class="text-xl font-semibold text-gray-900">
+          Edit your published news
+        </h3>
+        <p class="text-sm text-gray-600 mt-1">Make sure your news is up to date</p>
+      </div>
+      <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="hideModal()">
+        <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+    </div>
+    <!-- Modal body -->
+    <div class="px-6 py-4 space-y-6 form-style">
+      <!-- newsForm -->
+      <form id="newsEditForm">
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+          <input type="text" id="editTitle" name="title" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter news title" required>
+        </div>
+        <!-- content -->
+        <label for="content" class="block text-sm font-medium text-gray-700">Content</label>
+        <textarea id="editContent" name="content" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter news contents" required></textarea>
+
+        <div class="mb-4">
+          <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
+          <select id="editCategory" name="category" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" required>
+            <option value="">Choose a category</option>
+            <option value="Transfer">Transfer</option>
+            <option value="Update">Update</option>
+            <option value="Exclusive">Exclusive</option>
+            <option value="Match">Match</option>
+            <option value="Rumor">Rumor</option>
+            <option value="Analysis">Analysis</option>
+          </select>
+        </div>
+
+        <!-- added type -->
+        <div class="mb-4">
+          <label for="sports_type" class="block text-sm font-medium text-gray-700">Sports Type</label>
+          <input type="text" id="editType" name="sports_type" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter the type of sports" required>
+        </div>
+
+        <div class="mb-4">
+          <label for="thumbnail" class="block text-sm font-medium text-gray-700">Thumbnail URL</label>
+          <input type="url" id="editThumbnail" name="thumbnail" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://example.com/image.jpg">
+        </div>
+        <div class="mb-4">
+          <div class="flex items-center">
+            <input id="edit_is_featured" name="is_featured" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+            <label for="is_featured" class="ml-2 text-sm font-medium text-gray-900">Featured News</label>
+          </div>
+        </div>
+      </form>
+    </div>
+     <!-- submitNews -->
+    <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
+      <button type="button" id="cancelEdit" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors text-center" onclick="hideEditModal()">Cancel</button>
+      <button type="submit" id="submitEdit" form="newsEditForm" class="order-1 sm:order-2 flex-1 bg-black text-white px-6 py-3 rounded-md font-medium hover:bg-gray-700 transition-colors">Edit Artikel</button>
+    </div>
+  </div>
+  <div id="read">
+
+  </div>
+  <!-- Modal footer -->
+</div>
+
+
+<script>
+  function showModal() {
+      const modal = document.getElementById('crudModal');
+      const modalContent = document.getElementById('crudModalContent');
+
+      modal.classList.remove('hidden'); 
+      modalContent.classList.remove('hidden');
+      setTimeout(() => {
+        modalContent.classList.remove('opacity-0', 'scale-95');
+        modalContent.classList.add('opacity-100', 'scale-100');
+      }, 50); 
+  }
+
+  function showConfirmModal() {
+    const modal = document.getElementById('crudModal');
+    const confirm = document.getElementById("confirm");
+    modal.classList.remove('hidden');
+    confirm.classList.remove('hidden');
+    setTimeout(() => {
+      confirm.classList.remove('opacity-0', 'scale-95');
+      confirm.classList.add('opacity-100', 'scale-100');
+    }, 50);
+  }
+
+  function showEditModal() {
+    const modal = document.getElementById('crudModal');
+    const edit = document.getElementById('update');
+    modal.classList.remove('hidden');
+    edit.classList.remove('hidden');
+    setTimeout(() => {
+      edit.classList.remove('opacity-0', 'scale-95');
+      edit.classList.add('opacity-100', 'scale-100');
+    }, 50);
+  }
+
+  function hideModal() {
+      const modal = document.getElementById('crudModal');
+      const modalContent = document.getElementById('crudModalContent');
+
+      modalContent.classList.remove('opacity-100', 'scale-100');
+      modalContent.classList.add('opacity-0', 'scale-95');
+
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modalContent.classList.add('hidden');
+      }, 150); 
+  }
+
+  function hideConfirmModal() {
+    const modal = document.getElementById('crudModal');
+    const confirm = document.getElementById("confirm");
+
+    confirm.classList.remove('opacity-100', 'scale-100');
+    confirm.classList.add('opacity-0', 'scale-95');
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      confirm.classList.add('hidden');
+    }, 150); 
+  }
+
+  function hideEditModal() {
+    const modal = document.getElementById('crudModal');
+    const edit = document.getElementById('update');
+    modal.classList.add('hidden');
+    edit.classList.add('hidden');
+    setTimeout(() => {
+      edit.classList.add('opacity-0', 'scale-95');
+      edit.classList.remove('opacity-100', 'scale-100');
+    }, 50);
+  }
+
+  async function addNewsEntry() {
+    await fetch("{% url 'article:add_news_entry_ajax' %}", {
+      method: "POST",
+      body: new FormData(document.querySelector('#newsForm')),
+    })
+
+    document.getElementById("newsForm").reset();
+    hideModal();
+        
+    // Show toast notification
+    showToast('News added successfully!', '', 'success');
+    // Dispatch custom event to notify main.html about new data
+    document.dispatchEvent(new CustomEvent('newsAdded'));
+
+    return false;
+  }
+
+  document.getElementById("newsForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    addNewsEntry();
+  })
+</script>
