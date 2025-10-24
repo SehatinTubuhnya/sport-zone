@@ -5,14 +5,14 @@
 {% endblock meta %}
 {% block content %}
 <!-- head picture -->
-  <div class="bg-cover w-full h-[100px]"
-    style="background-image: url('https://png.pngtree.com/thumb_back/fh260/background/20230518/pngtree-red-sports-car-on-the-track-image_2530670.jpg')">
-     <div class="bg-white/30 backdrop-blur-sm p-3">
+  <div class="w-full h-[120px] relative">
+    <img src="{% static 'images/header-img.png' %}" alt="Header Banner" class="w-full h-full object-cover" />
+     <div class="bg-white/30 backdrop-blur-sm p-3 absolute inset-0 w-full h-[120px]">
        <div class="absolute inset-0 bg-black opacity-50"></div>
           <div class="relative z-10 flex items-center justify-center h-full">
             <div class="flex items-center justify-center ">
               <div class="w-20 h-20 mx-2">
-                <img src="{% static 'image/logo.png' %}" alt="No news available" class="w-full h-full object-contain">
+                <img src="{% static 'image/logo.png' %}" alt="No logo available" class="w-full h-full object-contain">
               </div>
               <div class="text-white">
                 <p class="text-2xl font-bold">SportZone</p>
@@ -22,7 +22,6 @@
           </div>
         </div>
       </div>
-    <div>
   </div>
 <div class="bg-white w-full h-full p-6">
   <!-- <div class="mt-6 flex flex-row justify-between">
