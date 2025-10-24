@@ -1,1 +1,93 @@
-<p>Hello, world!</p>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="w-full flex justify-center">
+  <div class="container flex flex-col items-center p-4 mt-4">
+    {% include 'admin/admin-header.html' %}
+    <div class="flex">
+      <div class="bg-white rounded-lg shadow-md p-6 m-4 w-64 border border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Total Users</h2>
+        <div class="loading">
+          {% include 'components/loading-svg.html' %}
+        </div>
+        <p id="total-users" class="text-3xl font-bold text-black"></p>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6 m-4 w-64 border border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Total Articles</h2>
+        <div class="loading">
+          {% include 'components/loading-svg.html' %}
+        </div>
+        <p id="total-articles" class="text-3xl font-bold text-black"></p>
+      </div>
+      <div class="bg-white rounded-lg shadow-md p-6 m-4 w-64 border border-gray-200">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Total Products</h2>
+        <div class="loading">
+          {% include 'components/loading-svg.html' %}
+        </div>
+        <p id="total-products" class="text-3xl font-bold text-black"></p>
+      </div>
+    </div>
+    <div class="bg-white rounded-lg shadow-md p-6 m-4 w-full border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent Activity Logs</h2>
+      <table class="w-full table-auto">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Timestamp</th>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">User</th>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Action</th>
+          </tr>
+        </thead>
+        <tbody id="logs-tbody">
+          <tr class="loading">
+            <td colspan="3" class="text-center pt-2">
+              <div>
+                {% include 'components/loading-svg.html' %}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    const SUMMARY_ENDPOINT = "{% url 'admin:summary' %}";
+
+    const totalUsers = document.getElementById("total-users");
+    const totalArticles = document.getElementById("total-articles");
+    const totalProducts = document.getElementById("total-products");
+    const logsTableBody = document.getElementById("logs-tbody");
+
+    async function fetchSummary() {
+      const resp = await fetch(SUMMARY_ENDPOINT, {
+        method: "GET"
+      });
+      const data = await resp.json();
+
+      totalUsers.innerText = data.user_count;
+      totalArticles.innerText = data.article_count;
+      totalProducts.innerText = data.product_count;
+
+      if (data.recent_logs.length) {
+        for (const log of data.recent_logs) {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">${log.timestamp}</td>
+              <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">${log.actor}</td>
+              <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">${log.action}</td>`;
+
+          logsTableBody.appendChild(row);
+        }
+      } else {
+        const row = document.createElement("tr");
+        row.innerHTML = `<td colspan="3" class="text-center text-sm pt-2"><p>No logs recorded yet.</p></td>`;
+        logsTableBody.appendChild(row);
+      }
+
+      for (const element of document.querySelectorAll(".loading")) {
+        element.remove();
+      }
+    }
+
+    fetchSummary();
+  </script>
+</div>
+{% endblock %}

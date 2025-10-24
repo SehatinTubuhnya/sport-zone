@@ -12,99 +12,536 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
       <aside class="lg:col-span-1">
-        <div class="bg-white p-4 rounded-lg shadow-md sticky top-4 border border-gray-200">
+        <form id="filter-form" class="bg-white p-4 rounded-lg shadow-md sticky top-4 border border-gray-200">
           <h3 class="text-xl font-semibold text-gray-900 mb-4">Filter</h3>
-
           <div>
-            <input type="text" placeholder="Cari produk..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+            <input type="text" id="filter-search" name="search" placeholder="Cari produk..." class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
           </div>
-
           <div class="mt-4">
             <h4 class="font-medium text-gray-800 mb-2">Kategori</h4>
             <div class="space-y-2">
               <label class="flex items-center text-sm text-gray-600">
-                <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
-                Sepatu
+                <input type="checkbox" name="category" value="apparel" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
+                Pakaian (Apparel)
               </label>
               <label class="flex items-center text-sm text-gray-600">
-                <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
-                Jersey
+                <input type="checkbox" name="category" value="equipment" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
+                Peralatan (Equipment)
               </label>
               <label class="flex items-center text-sm text-gray-600">
-                <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
-                Alat Olahraga
-              </label>
-              <label class="flex items-center text-sm text-gray-600">
-                <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
-                Aksesoris
+                <input type="checkbox" name="category" value="ball" class="h-4 w-4 rounded border-gray-300 text-black focus:ring-black mr-2">
+                Bola
               </label>
             </div>
           </div>
-
           <div class="mt-4">
             <h4 class="font-medium text-gray-800 mb-2">Rentang Harga</h4>
             <div class="flex items-center space-x-2">
-              <input type="number" placeholder="Min" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+              <input type="number" id="filter-min-price" name="min_price" placeholder="Min" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
               <span class="text-gray-500">-</span>
-              <input type="number" placeholder="Max" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
+              <input type="number" id="filter-max-price" name="max_price" placeholder="Max" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm">
             </div>
           </div>
-          
-          <button class="w-full bg-black text-white p-2 rounded-md font-semibold hover:bg-gray-800 mt-6 transition">
+          <button type="button" id="filter-apply-btn" class="w-full bg-black text-white p-2 rounded-md font-semibold hover:bg-gray-800 mt-6 transition">
             Terapkan Filter
           </button>
-        </div>
+        </form>
       </aside>
-
       <section class="lg:col-span-3">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-gray-900">PRODUK (96)</h2>
-          <select class="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-black focus:border-black">
-            <option>Urutkan: Terbaru</option>
-            <option>Urutkan: Termurah</option>
-            <option>Urutkan: Termahal</option>
-          </select>
+          <h2 id="product-count-heading" class="text-2xl font-bold text-gray-900">MEMUAT...</h2>
+          
+          <div class="flex items-center space-x-4">
+            {% if user.is_admin or user.is_seller %}
+            <button id="add-product-btn" class="bg-black text-white px-4 py-2 rounded-md font-semibold text-sm hover:bg-gray-800 transition">
+              + Tambah Produk
+            </button>
+            {% endif %}
+            <select id="sort-select" name="sort" class="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-black focus:border-black">
+              <option value="latest">Urutkan: Terbaru</option>
+              <option value="price_asc">Urutkan: Termurah</option>
+              <option value="price_desc">Urutkan: Termahal</option>
+            </select>
+          </div>
         </div>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-
-          <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-            <img src="https://placehold.co/300x300/F3F4F6/777777?text=Sepatu+A" alt="Sepatu A" class="w-full h-48 object-contain mb-4 rounded">
-            <h3 class="font-semibold text-gray-800">Sepatu A</h3>
-            <p class="text-lg font-bold text-black mt-1">Rp 100.000</p>
-            <p class="text-sm text-gray-500 mt-1">56 terjual</p>
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div class="text-center sm:col-span-2 xl:col-span-3 py-10 text-gray-500">
+            Memuat produk...
           </div>
-
-          <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-            <img src="https://placehold.co/300x300/F3F4F6/777777?text=Jersey+Timnas" alt="Jersey" class="w-full h-48 object-contain mb-4 rounded">
-            <h3 class="font-semibold text-gray-800">Jersey Timnas</h3>
-            <p class="text-lg font-bold text-black mt-1">Rp 250.000</p>
-            <p class="text-sm text-gray-500 mt-1">102 terjual</p>
-          </div>
-
-          <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-            <img src="https://placehold.co/300x300/F3F4F6/777777?text=Helm+F1" alt="Helm F1" class="w-full h-48 object-contain mb-4 rounded">
-            <h3 class="font-semibold text-gray-800">Miniatur Helm F1</h3>
-            <p class="text-lg font-bold text-black mt-1">Rp 750.000</p>
-            <p class="text-sm text-gray-500 mt-1">12 terjual</p>
-          </div>
-
-          </div>
+        </div>
         
         <div class="flex justify-center mt-8">
-          <nav class="flex space-x-2">
-            <a href="#" class="px-4 py-2 rounded-md bg-black text-white font-medium">1</a>
-            <a href="#" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">2</a>
-            <a href="#" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">3</a>
-            <span class="px-4 py-2 text-gray-500">...</span>
-            <a href="#" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">&gt;</a>
-          </nav>
+          <nav id="pagination-container" class="flex space-x-2">
+            </nav>
         </div>
 
       </section>
-
-    </div>
+      </div>
   </main>
 </div>
 
+
+<div id="product-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+    <div class="flex justify-between items-center border-b p-4">
+      <h3 id="modal-title" class="text-xl font-semibold">Tambah Produk Baru</h3>
+      <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+    </div>
+
+    <form id="product-form" class="p-6 space-y-4">
+      <input type="hidden" id="form-product-id" name="product_id">
+      
+      <div>
+        <label for="form-product-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
+        <input type="text" id="form-product-name" name="name" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+      </div>
+      
+      <div>
+        <label for="form-product-price" class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+        <input type="number" id="form-product-price" name="price" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+      </div>
+      
+      <div>
+        <label for="form-product-category" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+        <select id="form-product-category" name="category" required class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white">
+          <option value="equipment">Equipment</option>
+          <option value="apparel">Apparel</option>
+          <option value="ball">Ball</option>
+        </select>
+      </div>
+      
+      <div>
+        <label for="form-product-thumbnail" class="block text-sm font-medium text-gray-700 mb-1">URL Thumbnail (Opsional)</label>
+        <input type="url" id="form-product-thumbnail" name="thumbnail" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+      </div>
+
+      <div>
+        <label for="form-product-description" class="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+        <textarea id="form-product-description" name="description" rows="4" required class="w-full px-3 py-2 border border-gray-300 rounded-md"></textarea>
+      </div>
+      
+      <div id="form-message" class="text-sm text-red-600 hidden"></div>
+
+      <div class="flex justify-end space-x-3 pt-4 border-t">
+        <button type="button" id="modal-cancel-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-medium hover:bg-gray-300">
+          Batal
+        </button>
+        <button type="submit" id="form-submit-btn" class="bg-black text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800">
+          Simpan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 1. Seleksi Elemen DOM ---
+    // Filter & List
+    const filterForm = document.getElementById('filter-form');
+    const filterButton = document.getElementById('filter-apply-btn');
+    const sortSelect = document.getElementById('sort-select');
+    const productGrid = document.getElementById('product-grid');
+    const productCountHeading = document.getElementById('product-count-heading');
+    const paginationContainer = document.getElementById('pagination-container');
+
+    // Modal
+    const productModal = document.getElementById('product-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    
+    // Tombol "Add Product" (Perlu cek null jika user bukan admin/seller)
+    const addProductBtn = document.getElementById('add-product-btn'); 
+
+    // Form Modal
+    const productForm = document.getElementById('product-form');
+    const formProductId = document.getElementById('form-product-id');
+    const formMessage = document.getElementById('form-message');
+    const formSubmitBtn = document.getElementById('form-submit-btn');
+
+    // --- 2. State Aplikasi ---
+    let currentState = {
+      page: 1,
+      search: '',
+      categories: [],
+      min_price: '',
+      max_price: '',
+      sort: 'latest'
+    };
+    
+    // State untuk data user yang login (didapat dari API)
+    let currentUserId = null;
+    let isUserAdmin = false;
+
+    // Format mata uang
+    const formatter = new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    });
+    
+    // Token CSRF Django (PENTING untuk POST, PUT, DELETE)
+    // Fungsi untuk mendapatkan cookie CSRF
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, 10) === ('csrftoken' + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const CSRF_TOKEN = getCSRFToken();
+
+
+    // --- 3. Fungsi Utama Pengambilan Data ---
+
+    async function fetchProducts(page = 1) {
+      currentState.page = page;
+      productGrid.innerHTML = `<div class="text-center sm:col-span-2 xl:col-span-3 py-10 text-gray-500">Memuat...</div>`;
+      productCountHeading.textContent = 'MENGHITUNG...';
+      paginationContainer.innerHTML = ''; 
+
+      const params = new URLSearchParams();
+      params.append('page', currentState.page);
+      params.append('sort', currentState.sort);
+      
+      if (currentState.search) params.append('search', currentState.search);
+      if (currentState.min_price) params.append('min_price', currentState.min_price);
+      if (currentState.max_price) params.append('max_price', currentState.max_price);
+      currentState.categories.forEach(cat => params.append('category', cat));
+
+      // Ganti dengan URL API Anda
+      const API_ENDPOINT = `{% url 'product:api-product-list' %}?${params.toString()}`;
+
+      try {
+        const response = await fetch(API_ENDPOINT);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        /**
+         * PENTING: Asumsi struktur data response dari API (lihat views.py)
+         * {
+         * total_count: 96,
+         * total_pages: 10,
+         * current_page: 1,
+         * logged_in_user_id: 123, // ID user yang login
+         * is_admin: false,       // Status admin user yang login
+         * results: [ ...produk... ]
+         * }
+         */
+        const data = await response.json();
+
+        // Simpan data user yang login dari API
+        currentUserId = data.logged_in_user_id;
+        isUserAdmin = data.is_admin;
+
+        renderProducts(data.results || []);
+        renderPagination(data); 
+        updateProductCount(data.total_count || 0); 
+
+      } catch (error) {
+        console.error("Gagal mengambil data produk:", error);
+        productGrid.innerHTML = `<div class="text-center sm:col-span-2 xl:col-span-3 py-10 text-red-500">Terjadi kesalahan.</div>`;
+        productCountHeading.textContent = 'GAGAL MEMUAT';
+      }
+    }
+
+    // --- 4. Fungsi-Fungsi Helper (Render) ---
+
+    function renderProducts(products) {
+      productGrid.innerHTML = ''; 
+
+      if (products.length === 0) {
+        productGrid.innerHTML = `<div class="text-center sm:col-span-2 xl:col-span-3 py-10 text-gray-500">Produk tidak ditemukan.</div>`;
+        return;
+      }
+
+      products.forEach(product => {
+        const imageUrl = product.thumbnail || 'https://placehold.co/300x300/F3F4F6/777777?text=No+Image';
+        
+        // Cek Otorisasi untuk Tombol Edit/Delete
+        // 'product.seller_id' harus dikirim dari API (lihat views.py)
+        const isOwner = product.seller_id === currentUserId;
+        const canManage = isUserAdmin || isOwner;
+
+        let managementButtons = '';
+        if (canManage) {
+          managementButtons = `
+            <div class="flex justify-end space-x-2 mt-3">
+              <button 
+                data-id="${product.id}" 
+                class="edit-btn text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded hover:bg-gray-200">
+                Edit
+              </button>
+              <button 
+                data-id="${product.id}" 
+                class="delete-btn text-xs bg-red-100 text-red-700 px-3 py-1 rounded hover:bg-red-200">
+                Delete
+              </button>
+            </div>
+          `;
+        }
+        
+        const productCard = `
+          <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200 flex flex-col justify-between">
+            <div>
+              <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-contain mb-4 rounded">
+              <h3 class="font-semibold text-gray-800 truncate" title="${product.name}">${product.name}</h3>
+              <p class="text-lg font-bold text-black mt-1">${formatter.format(product.price)}</p>
+              <p class="text-sm text-gray-500 mt-1">Penjual: ${product.seller_name}</p>
+            </div>
+            ${managementButtons}
+          </div>
+        `;
+        productGrid.insertAdjacentHTML('beforeend', productCard);
+      });
+    }
+
+    // (renderPagination dan updateProductCount tidak berubah dari sebelumnya)
+    function renderPagination(data) {
+      paginationContainer.innerHTML = '';
+      const { total_pages, current_page } = data;
+      if (!total_pages || total_pages <= 1) return;
+      
+      if (current_page > 1) {
+        paginationContainer.insertAdjacentHTML('beforeend', `<a href="#" data-page="${current_page - 1}" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">&lt;</a>`);
+      }
+      for (let i = 1; i <= total_pages; i++) {
+        if (i === current_page) {
+          paginationContainer.insertAdjacentHTML('beforeend', `<span class="px-4 py-2 rounded-md bg-black text-white font-medium">${i}</span>`);
+        } else if (Math.abs(i - current_page) < 3 || i === 1 || i === total_pages) {
+          paginationContainer.insertAdjacentHTML('beforeend', `<a href="#" data-page="${i}" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">${i}</a>`);
+        } else if (Math.abs(i - current_page) === 3) {
+            paginationContainer.insertAdjacentHTML('beforeend', `<span class="px-4 py-2 text-gray-500">...</span>`);
+        }
+      }
+      if (current_page < total_pages) {
+        paginationContainer.insertAdjacentHTML('beforeend', `<a href="#" data-page="${current_page + 1}" class="px-4 py-2 rounded-md bg-white text-gray-700 hover:bg-gray-50 border">&gt;</a>`);
+      }
+    }
+    
+    function updateProductCount(count) {
+      productCountHeading.textContent = `PRODUK (${count})`;
+    }
+
+    function updateFilterState() {
+      const formData = new FormData(filterForm);
+      currentState.search = formData.get('search') || '';
+      currentState.min_price = formData.get('min_price') || '';
+      currentState.max_price = formData.get('max_price') || '';
+      currentState.categories = formData.getAll('category');
+      currentState.sort = sortSelect.value;
+    }
+
+
+    // --- 5. Fungsi-Fungsi Modal & Form ---
+    
+    function showModal() {
+      productModal.classList.remove('hidden');
+    }
+
+    function hideModal() {
+      productModal.classList.add('hidden');
+      formMessage.classList.add('hidden');
+      formMessage.textContent = '';
+    }
+
+    function resetForm() {
+      productForm.reset(); // Reset semua field
+      formProductId.value = ''; // Pastikan ID produk kosong
+      modalTitle.textContent = 'Tambah Produk Baru';
+      formSubmitBtn.textContent = 'Simpan';
+      formSubmitBtn.disabled = false;
+    }
+
+    // Buka modal untuk "Tambah Produk"
+    function openModalForAdd() {
+      resetForm();
+      showModal();
+    }
+
+    // Buka modal untuk "Edit Produk"
+    async function openModalForEdit(productId) {
+      resetForm();
+      modalTitle.textContent = 'Mengedit Produk...';
+      formSubmitBtn.disabled = true;
+      showModal();
+
+      try {
+        // URL fetch ini sekarang menunjuk ke view 'product_detail_view'
+        // (URL-nya sama, /api/products/<pk>/, tapi view-nya berbeda)
+        const URL = "{% url 'product:api-product-detail' 1234 %}";
+        const response = await fetch(URL.replace("1234", productId)); 
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || 'Produk tidak ditemukan atau Anda tidak punya izin');
+        }
+        
+        const product = await response.json();
+
+        // ... (Logika mengisi form tetap sama) ...
+        modalTitle.textContent = 'Edit Produk';
+        formProductId.value = product.id;
+        document.getElementById('form-product-name').value = product.name;
+        document.getElementById('form-product-price').value = product.price;
+        document.getElementById('form-product-category').value = product.category;
+        document.getElementById('form-product-thumbnail').value = product.thumbnail || '';
+        document.getElementById('form-product-description').value = product.description;
+
+        formSubmitBtn.textContent = 'Update';
+        formSubmitBtn.disabled = false;
+
+      } catch (error) {
+        console.error('Gagal mengambil detail produk:', error);
+        formMessage.textContent = error.message;
+        formMessage.classList.remove('hidden');
+      }
+    }
+
+    // Menangani submit form (Tambah atau Edit)
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      formSubmitBtn.disabled = true;
+      formSubmitBtn.textContent = 'Menyimpan...';
+      formMessage.classList.add('hidden');
+
+      const formData = new FormData(productForm);
+      const productId = formProductId.value;
+
+      let url = '';
+      let method = 'POST'; // Method sekarang SELALU POST
+
+      if (productId) {
+        // --- EDIT (POST) ---
+        // URL BARU untuk update
+        const base = "{% url 'product:api-product-update' 1234 %}"
+        url = base.replace("1234", productId); 
+      } else {
+        // --- ADD (POST) ---
+        // URL ini tetap sama
+        url = "{% url 'product:api-product-create' %}"; 
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: method, // Selalu 'POST'
+          body: formData,
+          headers: {
+            'X-CSRFToken': CSRF_TOKEN,
+          }
+        });
+
+        // ... (logika penanganan response tetap sama) ...
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Terjadi kesalahan server.');
+        }
+        hideModal();
+        fetchProducts(productId ? currentState.page : 1); 
+
+      } catch (error) {
+        console.error('Gagal submit form:', error);
+        formMessage.textContent = error.message;
+        formMessage.classList.remove('hidden');
+        formSubmitBtn.disabled = false;
+        formSubmitBtn.textContent = productId ? 'Update' : 'Simpan';
+      }
+    }
+
+    // Menangani hapus produk
+    async function handleDeleteProduct(productId) {
+      if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+        return;
+      }
+
+      try {
+        // URL BARU untuk delete, dan METHOD BARU
+        const URL = "{% url 'product:api-product-delete' 1234 %}"
+        const response = await fetch(URL.replace("1234", productId), {
+          method: 'POST', // Method diubah dari DELETE menjadi POST
+          headers: {
+            'X-CSRFToken': CSRF_TOKEN
+          }
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Gagal menghapus produk.');
+        }
+
+        fetchProducts(currentState.page);
+
+      } catch (error) {
+        console.error('Gagal menghapus:', error);
+        alert(error.message); 
+      }
+    }
+
+
+    // --- 6. Event Listeners ---
+
+    // Filter & Sort
+    filterButton.addEventListener('click', () => {
+      updateFilterState();
+      fetchProducts(1); 
+    });
+    sortSelect.addEventListener('change', () => {
+      currentState.sort = sortSelect.value;
+      fetchProducts(1); 
+    });
+
+    // Pagination (delegation)
+    paginationContainer.addEventListener('click', (e) => {
+      e.preventDefault(); 
+      const target = e.target.closest('a[data-page]');
+      if (target) {
+        const page = parseInt(target.dataset.page, 10);
+        if (page !== currentState.page) {
+          fetchProducts(page);
+          productGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    });
+
+    // Modal Triggers
+    // Hanya tambahkan listener jika tombolnya ada
+    if (addProductBtn) {
+      addProductBtn.addEventListener('click', openModalForAdd);
+    }
+    modalCloseBtn.addEventListener('click', hideModal);
+    modalCancelBtn.addEventListener('click', hideModal);
+
+    // Modal Form Submit
+    productForm.addEventListener('submit', handleFormSubmit);
+
+    // Grid: Edit & Delete (delegation)
+    productGrid.addEventListener('click', (e) => {
+      const editButton = e.target.closest('.edit-btn');
+      const deleteButton = e.target.closest('.delete-btn');
+
+      if (editButton) {
+        e.preventDefault();
+        const id = editButton.dataset.id;
+        openModalForEdit(id);
+      }
+
+      if (deleteButton) {
+        e.preventDefault();
+        const id = deleteButton.dataset.id;
+        handleDeleteProduct(id);
+      }
+    });
+
+    // --- 7. Panggilan Awal ---
+    fetchProducts(1);
+
+  });
+</script>
 {% endblock content %}
