@@ -6,7 +6,9 @@ from article.views import show_xml_by_id, show_json_by_id
 
 from article.views import edit_article, delete_article
 
-from article.views import add_news_entry_ajax, edit_news_entry_ajax, get_news_entry_ajax, delete_news_entry_ajax
+from article.views import add_news_entry_ajax, edit_news_entry_ajax
+from article.views import get_news_entry_ajax, delete_news_entry_ajax
+from article.views import get_username_by_id
 
 app_name = 'article'
 
@@ -28,4 +30,6 @@ urlpatterns = [
     # path('login-ajax/', login_ajax, name='login-ajax'),
     # path('register-ajax/', register_ajax, name='register-ajax'),
     # path('logout-ajax/', logout_ajax, name='logout-ajax'),
+
+    path('get-username-by-id/<int:id>', get_username_by_id, name='get_username-by-id'),
 ]

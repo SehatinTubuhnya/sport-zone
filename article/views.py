@@ -13,6 +13,8 @@ from django.views.decorators.http import require_POST, require_GET
 from django.utils.html import strip_tags
 from django.http import HttpResponseRedirect, JsonResponse
 
+from account.models import CustomUser
+
 # Create your views here.
 def show_article(request):
     filter_type = request.GET.get("filter", "all")
@@ -178,3 +180,10 @@ def delete_news_entry_ajax(request, product_id):
         return JsonResponse({'success': True})
     except News.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
+    
+def get_username_by_id(request, id):
+    try:
+        user = CustomUser.objects.get(pk=id)
+        return JsonResponse({"id": user.id, "username": user.username})
+    except CustomUser.DoesNotExist:
+        return JsonResponse({"error": "User not found"}, status=404)

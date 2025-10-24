@@ -1,19 +1,349 @@
 {% extends 'base.html' %}
+
+{% block meta %}
+<title id="siteTitle"></title>
+{% endblock meta %}
+
 {% block content %}
-<p><a href="{% url 'article:show_article' %}"><button>← Back to News List</button></a></p>
+<div class="bg-white w-full min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Loading State -->
+         <!-- again, i changed the colour -->
+        <div id="loading-state" class="bg-white rounded-lg border border-gray-200 p-12 text-center">
+            <svg class="animate-spin h-8 w-8 text-green-600 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="cyan-500" stroke-width="4"></circle>
+                <path class="opacity-75" fill="cyan-500" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <p class="text-gray-600 mt-3">Loading news details...</p>
+        </div>
 
-<h1>{{ news.title }}</h1>
-<p><b>{{ news.get_category_display }}</b>{% if news.is_featured %} | 
-    <b>Featured</b>{% endif %}{% if news.is_news_hot %} | 
-    <b>Hot</b>{% endif %} | <i>{{ news.created_at|date:"d M Y, H:i" }}</i> 
-    | Views: {{ news.news_views }}</p>
+        <!-- Error State -->
+        <div id="error-state" class="bg-white rounded-lg border border-gray-200 p-12 text-center hidden">
+            <div class="w-16 h-16 mx-auto mb-4">
+                <div class="text-red-500 text-5xl">⚠️</div>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Failed to load news</h3>
+            <p class="text-gray-500">Please try again later.</p>
+        </div>
 
-{% if news.thumbnail %}
-<img src="{{ news.thumbnail }}" alt="News thumbnail" width="300">
-<br /><br />
-{% endif %}
-<p>Author : {{ news.user.username }}</p>
+        <!-- Article -->
+         <!-- article-content -->
+        <article id="article-content" class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <!-- Header -->
+            <div class="p-6 sm:p-8">
+                <div class="flex flex row justify-between">
+                    <div>
+                        <p id="path" class="text-gray-600">Home  >  Artikel  >  </p>
+                    </div>
+                    <!-- Back Navigation -->
+                    <div class="mb-6">
+                        <a href="{% url 'article:show_article' %}" class="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                            ← Back to Main menu
+                        </a>
+                    </div>
+                </div>
+                <div id="badges-container" class="flex flex-wrap items-center gap-2 mb-4">
+                    <!-- Dynamic badges will be inserted here -->
+                </div>
+                
+                <!-- article title -->
+                <h1 id="news-title" class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                    <!-- Title will be inserted here -->
+                </h1>
+                
+                <!-- article-date -> posted date -->
+                <div class="flex flex-wrap items-center text-sm text-gray-500 gap-4 mb-4">
+                    <div id="author">
 
-<p>{{ news.content }}</p>
+                    </div>
+                    <time id="posted-date">
+                        <!-- Date will be inserted here -->
+                    </time>
+
+                    <span id="news-type">
+                    <!-- News will be inserted here -->
+                    </span>
+                </div>
+
+                <div id="editDeleteBtn">
+                    
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            <div id="featured-image-container" class="px-6 sm:px-8 hidden">
+                <img id="featured-image" 
+                     src="" 
+                     alt="" 
+                     class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-lg">
+            </div>
+
+            <!-- Content -->
+            <div class="p-6 sm:p-8">
+                <div class="prose prose-lg max-w-none">
+                    <!-- article-content-text -->
+                    <div id="news-content" class="text-gray-700 leading-relaxed whitespace-pre-line text-base sm:text-lg">
+                        <!-- Content will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Author Info -->
+            <div class="border-t border-gray-200 p-6 sm:p-8 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium text-gray-900">
+                            <p id="article-author">Seller: Loading...</p>
+                        </div>
+                        <p class="text-sm text-gray-500">Seller</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
+
+<script>
+// Configuration
+const NEWS_ID = "{{ news.id }}";
+const NEWS_DETAIL_ENDPOINT = `{% url 'article:show_json_by_id' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', NEWS_ID);
+const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+
+window.onload = function() {
+    // DOM Elements
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const articleContent = document.getElementById('article-content');
+    const newsContent = document.getElementById('news-content');
+    const badgesContainer = document.getElementById('badges-container');
+    const newsTitle = document.getElementById('news-title');
+    const path = document.getElementById('path');
+    const author = document.getElementById('author');
+    const postedDate = document.getElementById('posted-date');
+    const newsType = document.getElementById('news-type');
+    const featuredImageContainer = document.getElementById('featured-image-container');
+    const featuredImage = document.getElementById('featured-image');
+    const articleAuthor = document.getElementById('article-author');
+    const editDeleteBtn = document.getElementById('editDeleteBtn');
+    const submitEdit = document.getElementById('submitEdit');
+
+
+
+    // Show/hide page sections
+    function showState(state) {
+        loadingState.classList.toggle('hidden', state !== 'loading');
+        errorState.classList.toggle('hidden', state !== 'error');
+        articleContent.classList.toggle('hidden', state !== 'ready');
+    }
+
+    // Get readable category name
+    function getCategoryLabel(categoryCode) {
+        const categoryMapping = {
+            transfer: 'Transfer',
+            update: 'Update',
+            exclusive: 'Exclusive',
+            match: 'Match',
+            rumor: 'Rumor',
+            analysis: 'Analysis',
+        };
+        return categoryMapping[categoryCode] || categoryCode;
+    }
+
+    // Fetch news data from server
+        async function fetchNewsFromServer() {
+            try {
+                showState('loading');
+                
+                const response = await fetch(NEWS_DETAIL_ENDPOINT, {
+                headers: { 'Accept': 'application/json' },
+                });
+
+                if (!response.ok) {
+                throw new Error('Failed to fetch news data from server');
+                }
+
+                const newsData = await response.json();
+                allNewsData = newsData || [];
+                
+                renderArticle(allNewsData);
+                showState('ready');
+            } catch (error) {
+                console.error('Error loading news:', error);
+                showState('error');
+            }
+        }
+
+    // Render article content
+    function renderArticle(news, username) {
+        // Set title
+        data = news[0].fields;
+        newsTitle.textContent = data.title;
+        document.title = `${data.title}`;
+
+        pathTitle = data.title;
+        if (pathTitle.length > 20) {
+            pathTitle = pathTitle.substring(0, 20) + "...";
+        }
+        
+        path.innerHTML = `Home  >  Artikel  >  ${pathTitle}`;
+
+        
+        // Set badges
+        badgesContainer.innerHTML = '';
+        
+        // Category badge
+        const categoryBadge = document.createElement('span');
+        categoryBadge.className = 'inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-600 text-white';
+        categoryBadge.textContent = getCategoryLabel(data.category);
+        badgesContainer.appendChild(categoryBadge);
+
+        const editDeleteButtons = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(data.user)
+            ? `<div class='flex space-x-2'>
+                <button data-id='${news.pk}' class=' editNews button bg-black hover:bg-gray-700 text-white text-sm transition-colors px-4 py-1 rounded'>Edit Artikel</button>
+            </div>`
+            : '';
+        editDeleteBtn.innerHTML = editDeleteButtons;
+
+        console.log("here");
+        let newsId = null;
+        function attachEditEventListeners() {
+            document.querySelectorAll('.editNews').forEach(button => {
+                button.addEventListener('click', async function(event) {
+                    event.preventDefault();
+                    console.log(this);
+                    newsId = news[0].pk;
+                    console.log(newsId)
+                    console.log("Fetching:", `/articles/get-news-ajax/${newsId}/`);
+
+                    const response = await fetch(`/articles/get-news-ajax/${newsId}`);
+                    const article = await response.json();
+                    console.log(article.sports_type);
+
+                    document.getElementById('editTitle').value = article.title;
+                    document.getElementById('editContent').value = article.content;
+                    document.getElementById('editCategory').value = article.category;
+                    document.getElementById('editType').value = article.sports_type;
+                    document.getElementById('editThumbnail').value = article.thumbnail;
+                    document.getElementById('edit_is_featured').checked = article.is_featured;
+                    showEditModal();
+                })
+            })
+        }
+
+        submitEdit.addEventListener('click', async function (event) {
+            event.preventDefault();
+            console.log("There");
+            if(!newsId) return;
+            try{
+                const form = document.getElementById('newsEditForm');
+                const formData = new FormData(form);
+                const response = await fetch(`/articles/edit-news-ajax/${newsId}`, {
+                method: 'POST',
+                body: formData
+                })
+
+                if (response.ok) {
+                showToast('News Edited','','success');
+                fetchNewsFromServer();
+                } else {
+                alert('failed to edit news');
+                }
+            } catch (error) {
+                console.error("Error editing news:", error);
+                alert("Error editing news.");
+            } finally {
+                hideEditModal();
+                newsId = null;
+            }
+        })
+
+        attachEditEventListeners();
+        
+        // Featured badge
+        if (data.is_featured) {
+            const featuredBadge = document.createElement('span');
+            featuredBadge.className = 'inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800';
+            featuredBadge.textContent = 'Featured';
+            badgesContainer.appendChild(featuredBadge);
+        }
+        
+        // Popular badge
+        if (data.news_views > 20) {
+            const popularBadge = document.createElement('span');
+            popularBadge.className = 'inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-red-100 text-red-800';
+            popularBadge.textContent = 'Popular';
+            badgesContainer.appendChild(popularBadge);
+        }
+        
+        // Set date and views
+        const formattedDate = new Date(data.created_at).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        postedDate.textContent = `    ${formattedDate}`;
+        // newsPrice.textContent = `Rp. ${news.price}`;
+        
+        // Set featured image
+        if (data.thumbnail) {
+            featuredImage.src = data.thumbnail;
+            featuredImage.alt = data.title;
+            featuredImageContainer.classList.remove('hidden');
+        } else {
+            featuredImageContainer.classList.add('hidden');
+        }
+        
+        // Set content
+        newsContent.textContent = data.content;
+        
+        // Set author
+        console.log("username in : " + username);
+        const authorName = username || 'Anonymous';
+        author.textContent = `Penulis : ${authorName}`;
+        articleAuthor.textContent = `Seller: ${authorName}`;
+    }
+
+    async function getUsername(id) {
+        const response = await fetch (`/articles/get-username-by-id/${id}`);
+        if (response.ok) {
+            const user = await response.json();
+            return user.username;
+        }
+        return "Anonymous";
+    } 
+
+    // Fetch news detail
+    async function loadNewsDetail() {
+        try {
+            showState('loading');
+            
+            const response = await fetch(NEWS_DETAIL_ENDPOINT, {
+                headers: { 'Accept': 'application/json' },
+            });
+            
+            console.log(response);
+            if (!response.ok) {
+                throw new Error('Failed to fetch news details');
+            }
+            
+            const newsData = await response.json();
+            const username = await getUsername(newsData[0].fields.user);
+            console.log("username : " + username);
+            renderArticle(newsData, username);
+            showState('ready');
+        } catch (error) {
+            console.error('Error loading news details:', error);
+            showState('error');
+        }
+    }
+
+    // Initialize page
+    loadNewsDetail();
+}
+</script>
 
 {% endblock content %}
