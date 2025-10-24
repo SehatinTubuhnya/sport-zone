@@ -120,9 +120,9 @@
 const NEWS_ID = "{{ news.id }}";
 const NEWS_DETAIL_ENDPOINT = `{% url 'article:show_json_by_id' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', NEWS_ID);
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
-const IS_ADMIN = "{{ user.is_admin }}";
-const IS_AUTHOR = "{{ user.is_author }}";
-const USERNAME = "{{ user.username }}";
+const IS_ADMIN = "{{ user.is_admin|lower }}" === 'true';
+const IS_AUTHOR = "{{ user.is_author|lower }}" === 'true';
+const USERNAME = "{{ user.username|lower }}" === 'true';
 
 window.onload = function() {
     // DOM Elements
@@ -212,7 +212,7 @@ window.onload = function() {
         categoryBadge.textContent = getCategoryLabel(data.category);
         badgesContainer.appendChild(categoryBadge);
 
-        const editDeleteButtons = CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(data.user)
+        const editDeleteButtons = (CURRENT_USER_ID && Number(CURRENT_USER_ID) === Number(data.user)) || IS_ADMIN
             ? `<div class='flex space-x-2'>
                 <button data-id='${news.pk}' class=' editNews button bg-black hover:bg-gray-700 text-white text-sm transition-colors px-4 py-1 rounded'>Edit Artikel</button>
             </div>`
@@ -327,7 +327,6 @@ window.onload = function() {
         const response = await fetch (`/articles/get-comment-by-id/${id}`);
         if (response.ok) {
             const comments = await response.json();
-            console.log(comments);
             return comments;
         }
         return;
@@ -438,7 +437,9 @@ window.onload = function() {
         }
     }
     
-    // document.addEventListener('commentAdded')
+    document.addEventListener('commentAdded', function() {
+        loadComments();
+    }) 
 
     // Initialize page
     loadNewsDetail();

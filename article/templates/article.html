@@ -30,22 +30,9 @@
      <div class="w-full flex items-center"><hr class="border-2 border-yellow-400 w-full"></div>
   </div> -->
 
-
-
-  <!-- erase this later -->
-  <div class="flex flex col items-center justify left mb-4">
-    
+  <div class="flex flex col items-center justify between w-full mb-4 gap-x-4">
     <div id="create"></div>
-    {% if user.is_authenticated %}
-    <a href="{% url 'account:logout' %}"><button id="logout" class="bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded transition-colors mx-4">Logout</button></a>
-    <h1>User : {{ username }}</h1>
-    {% else %}
-    <a href="{% url 'account:login' %}"><button id="login" class="bg-sky-300 hover:bg-sky-500 px-3 py-2 rounded transition-colors mx-2">Login</button></a>
-    {% endif %}
   </div>
-
-
-
 
   <!-- Loading State -->
   <!-- i changed some colors (svg class, circle class stroke, path class fill) here -->
@@ -104,17 +91,22 @@
     <div class="w-32 h-32 mx-auto mb-4">
       <img src="{% static 'image/no-news.png' %}" alt="No news available" class="w-full h-full object-contain">
     </div>
-    <h3 class="text-lg font-medium text-gray-900 mb-2">No News Yet</h3>
-    <p class="text-gray-500 mb-6">Got something to share?</p>
-    <a href="{% url 'article:add_news_entry_ajax' %}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
-      Create News
-    </a>
+    <div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada berita</h3>
+      <p class="text-gray-500 mb-6">Bagikan ceritamu!</p>
+      <a class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors" onclick="showModal()">
+        Buat artikel
+      </a>
+    </div>
   </div>
 </div>
 
 <script>
   const NEWS_API_ENDPOINT = "{% url 'article:show_json' %}";
   const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
+  const IS_AUTHOR = "{{ user.is_author|lower }}" === 'true';
+  const IS_ADMIN = "{{ user.is_admin|lower }} " === 'true';
+  console.log(IS_AUTHOR || IS_ADMIN);
 
   window.onload = function() {
     const loadingSpinner = document.getElementById('loading');
@@ -208,7 +200,7 @@
         <div class="aspect-[8/5] relative overflow-hidden">
           ${thumbnailHtml}
           <div class="absolute top-3 left-3">
-            <span class="inline-flex items-center px-2.5 py-0.5 d text-xs font-medium bg-green-600 text-white">${categoryLabel}</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 d text-xs font-medium rounded bg-green-700 text-white">${categoryLabel}</span>
           </div>
           <div class="absolute top-3 right-3 flex space-x-2">
             ${featuredLabel}
@@ -239,10 +231,18 @@
       featuredGridContainer.innerHTML = '';
       hotGridContainer.innerHTML = '';
       exploreGridContainer.innerHTML = '';
-      createBtn.innerHTML = `
-        <div class="m-4 rounded"> 
-          
-        </div>`
+      createBtn.innerHTML = '';
+      createBtn.innerHTML = (IS_AUTHOR || IS_ADMIN) ? `
+        <div class="m-4 w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
+          <p class="text-white">Hei kau! punya berita menarik?</p>
+          <button class="addArticle bg-white text-black hover:bg-gray-200 transition-colors px-4 py-1">Buat Artikel</button>
+        </div>` : '';
+      document.querySelectorAll(".addArticle").forEach (button => {
+        button.addEventListener('click', async function (event) {
+          event.preventDefault();
+          showModal();
+        })
+      })
       articles.forEach(news => {
         const cardElement = buildNewsCardElement(news);
         if (news.fields.is_featured) {
@@ -310,12 +310,6 @@
         });
       });
     }
-
-    createBtn.addEventListener('click', async function (event) {
-      event.preventDefault();
-      showModal();
-      
-    })
 
     // logoutBtn.addEventListener('click', async function (event) {
     //   event.preventDefault();

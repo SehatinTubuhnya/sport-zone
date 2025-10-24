@@ -16,18 +16,18 @@ from django.http import HttpResponseRedirect, JsonResponse
 from account.models import CustomUser
 
 # Create your views here.
-def edit_products(request, id):
-    products = get_object_or_404(News, pk=id)
-    form = ProductsForm(request.POST or None, instance=products)
-    if form.is_valid() and request.method == 'POST':
-        form.save()
-        return redirect('main:show_product')
+# def edit_products(request, id):
+#     products = get_object_or_404(News, pk=id)
+#     form = ProductsForm(request.POST or None, instance=products)
+#     if form.is_valid() and request.method == 'POST':
+#         form.save()
+#         return redirect('main:show_product')
 
-    context = {
-        'form': form
-    }
+#     context = {
+#         'form': form
+#     }
 
-    return render(request, "edit_products.html", context)
+    # return render(request, "edit_products.html", context)
 
 def show_article(request):
     filter_type = request.GET.get("filter", "all")
