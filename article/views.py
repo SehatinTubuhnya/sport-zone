@@ -99,7 +99,8 @@ def add_news_entry_ajax(request):
         sports_type=sports_type,
         thumbnail=thumbnail,
         is_featured=is_featured,
-        user=user
+        user=user,
+        username=user.username
     )
     new_product.save()
 
@@ -148,12 +149,12 @@ def get_news_entry_ajax(request, news_id):
     
 @require_POST
 @csrf_exempt
-def delete_news_entry_ajax(request, product_id):
+def delete_news_entry_ajax(request, news_id):
     try:
-        product = News.objects.get(id=product_id, user=request.user)
-        product.delete()
+        news = News.objects.get(id=news_id, user=request.user)
+        news.delete()
 
-        log = ActionLog.objects.create(actor=request.user.username, action=f"Menghapus artikel dengan judul '{product.title}'")
+        log = ActionLog.objects.create(actor=request.user.username, action=f"Menghapus artikel dengan judul '{news.title}'")
         log.save()
 
         return JsonResponse({'success': True})
@@ -172,7 +173,7 @@ def get_username_by_id(request, id):
 def add_comment_entry_ajax(request, news_id):
     content = strip_tags(request.POST.get("content"))
     user = request.user
-    username = request.user.username
+    username = user.username
     news = News.objects.get(pk=news_id)
 
     new_comment = Comment(

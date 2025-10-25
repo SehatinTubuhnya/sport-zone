@@ -25,7 +25,7 @@
   </div>
 <div class="bg-white w-full h-full p-6">
   <div class="flex flex col items-center justify between w-full mb-4 gap-x-4">
-    <div id="create"></div>
+    <div id="create" class="w-full"></div>
   </div>
 
   <!-- Loading State -->
@@ -108,15 +108,6 @@
     const hotGridContainer = document.getElementById('hotGrid');
     const featuredGridContainer = document.getElementById('featuredGrid');
     const exploreGridContainer = document.getElementById('exploreGrid');
-    const showAllNewsButton = document.getElementById('filter-all');
-    const showMyNewsButton = document.getElementById('filter-my');
-    const showFeaturedButton = document.getElementById('filter-featured');
-    const showCatTransferButton = document.getElementById('filter-transfer');
-    const showCatUpdateButton = document.getElementById('filter-update');
-    const showCatMatchButton = document.getElementById('filter-match');
-    const showCatRumorButton = document.getElementById('filter-rumor');
-    const showCatExclusiveButton = document.getElementById('filter-exclusive');
-    const showCatAnalysisButton = document.getElementById('filter-analysis');
     const refresh = document.getElementById('refresh');
     const confirmDelete = document.getElementById('confirmDelete');
     const submitEdit = document.getElementById('submitEdit');
@@ -162,7 +153,7 @@
       const category = DOMPurify.sanitize(data.category);
       const type = DOMPurify.sanitize(data.sports_type)
       const thumbnail = DOMPurify.sanitize(data.thumbnail);
-      const createdAt = DOMPurify.sanitize(new Date(data.created_at).toLocaleDateString('en-US', { 
+      const createdAt = DOMPurify.sanitize(new Date(data.created_at).toLocaleDateString('id-ID', { 
           year: 'numeric', 
           month: 'short', 
           day: 'numeric' 
@@ -222,17 +213,60 @@
       hotGridContainer.innerHTML = '';
       exploreGridContainer.innerHTML = '';
       createBtn.innerHTML = '';
-      createBtn.innerHTML = (IS_AUTHOR || IS_ADMIN) ? `
-        <div class="m-4 w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
-          <p class="text-white">Hei kau! punya berita menarik?</p>
-          <button class="addArticle bg-white text-black hover:bg-gray-200 transition-colors px-4 py-1">Buat Artikel</button>
-        </div>` : '';
+      createBtn.innerHTML = (true) ? `
+        <div class="w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
+          <button class="addArticle bg-white text-black hover:bg-gray-200 transition-colors px-4 py-1 rounded-md">Buat Artikel</button>
+          <div class="flex flex-row items-center">
+            <div class="mx-3 text-white">
+              <p>Filter : </p>
+            </div>
+            <div class="relative">
+              <select id="dropdown" name="dropdown" class="block w-16 sm:w-32 md:w-48 lg:w-64 pl-3 pr-10 py-2 text-base border-gray-300 sm:text-sm rounded-md">
+                <option value="all">All</option>
+                <option value="transfer">Transfer</option>
+                <option value="update">Update</option>
+                <option value="exclusive">Exclusive</option>
+                <option value="match">Match</option>
+                <option value="rumor">Rumor</option>
+                <option value="analysis">Analysis</option>
+              </select>
+            </div>
+          </div>
+        </div>` : `
+        <div class="w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
+          <div><p class="text-white mr-4">Berita jenis apa yang ada di pikiran anda?</p></div>
+          <div class="flex flex-row items-center">
+            <div class="mx-3 text-white">
+              <p>Filter : </p>
+            </div>
+            <div class="relative">
+              <select id="dropdown" name="dropdown" class="block w-16 sm:w-32 md:w-48 lg:w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <option value="all">All</option>
+                <option value="transfer">Transfer</option>
+                <option value="update">Update</option>
+                <option value="exclusive">Exclusive</option>
+                <option value="match">Match</option>
+                <option value="rumor">Rumor</option>
+                <option value="analysis">Analysis</option>
+              </select>
+            </div>
+          </div>
+        </div>`;
+
       document.querySelectorAll(".addArticle").forEach (button => {
         button.addEventListener('click', async function (event) {
           event.preventDefault();
           showModal();
         })
       })
+
+      const dropdown = document.getElementById('dropdown');
+      dropdown.value = activeFilter;
+      dropdown.addEventListener('change', () => {
+        activeFilter = dropdown.value; 
+        filterAndDisplayNews();
+      });
+
       articles.forEach(news => {
         const cardElement = buildNewsCardElement(news);
         if (news.fields.is_featured) {
@@ -250,19 +284,19 @@
 
     // Filter and display News
     function filterAndDisplayNews() {
-      // updateFilterButtonsAppearance();
+      let filteredNews;
       
-      const filteredNews = activeFilter === 'all' 
-        ? allNewsData 
-        : (activeFilter === 'my'
-        ? allNewsData.filter(news => Number(news.user_id) === Number(CURRENT_USER_ID))
-        : allNewsData.filter(news => news.is_featured === true));
-      
-      if (filteredNews.length === 0) {
-        displayPageSection({ showEmpty: true });
+      if (activeFilter === 'all') {
+          filteredNews = allNewsData;
       } else {
-        renderAllNewsCards(filteredNews);
-        displayPageSection({ showGrid: true });
+          filteredNews = allNewsData.filter(news => news.fields.category.toLowerCase() === activeFilter);
+      }
+
+      if (filteredNews.length === 0) {
+          displayPageSection({ showEmpty: true });
+      } else {
+          renderAllNewsCards(filteredNews);
+          displayPageSection({ showGrid: true });
       }
     }
 
@@ -288,7 +322,6 @@
         displayPageSection({ showError: true });
       }
     }
-
 
     let newsId = null;
     function attachDeleteEventListeners() {
@@ -372,21 +405,6 @@
       }
     })
 
-    // Event handlers
-    function handleShowAllNewsClick() {
-      activeFilter = 'all';
-      filterAndDisplayNews();
-    }
-
-    function handleShowMyNewsClick() {
-      activeFilter = 'my';
-      filterAndDisplayNews();
-    }
-
-    function handleShowFeaturedClick() {
-      activeFilter = 'featured';
-      filterAndDisplayNews();
-    }
 
     // Add event listener to detect new news
     document.addEventListener('newsAdded', function() {

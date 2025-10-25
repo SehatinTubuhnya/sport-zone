@@ -5,6 +5,7 @@ from account.models import CustomUser
 
 class News(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    username = models.CharField(max_length=100)
     CATEGORY_CHOICES = [
         ('transfer', 'Transfer'),
         ('update', 'Update'),
