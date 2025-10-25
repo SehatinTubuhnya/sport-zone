@@ -98,7 +98,7 @@ def load_news_data(apps, schema_editor):
                 break  # stop once we find one
         
         # Optional: find a user for the author (fallback to first admin or None)
-        user = CustomUser.objects.filter(is_admin=True).first()
+        user = CustomUser.objects.filter(is_staff=True).first()
         
         news_item = News.objects.create(
             user=user,
@@ -119,7 +119,7 @@ def load_news_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('article', '0001_initial'),
+        ('article', '0002_alter_news_thumbnail'),
     ]
 
     operations = [

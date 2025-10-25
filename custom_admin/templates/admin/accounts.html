@@ -4,7 +4,8 @@
 <div class="w-full flex justify-center">
   <div class="container flex flex-col items-center p-4 mt-4">
     {% include 'admin/admin-header.html' %}
-    <div class="bg-white rounded-lg shadow-md p-6 m-4 flex flex-col gap-5 w-full border border-gray-200">
+    <div class="bg-white rounded-lg shadow-md p-6 m-4 flex flex-col items-center gap-5 w-full border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Accounts</h2>
       <div class="w-full flex justify-between">
         <div class="flex items-center gap-2">
             <p>Per page: </p>
@@ -15,7 +16,6 @@
                 <option value="200">200</option>
             </select>
         </div>
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Accounts</h2>
         <div class="flex items-center gap-2">
             <p>Query:</p>
             <input type="text" id="query" class="border border-black focus:outline-none" />

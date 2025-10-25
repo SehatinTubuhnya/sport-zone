@@ -134,6 +134,9 @@ def edit_account_api(request: HttpRequest):
     account.is_seller = is_seller
     account.save()
 
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Mengedit user dengan username '{account.username}'")
+    log.save()
+
     return JsonResponse({"status": "success"}, safe=False)
 
 @csrf_exempt
@@ -147,6 +150,10 @@ def delete_account_api(request: HttpRequest):
         return JsonResponse({"status": "error", "message": "Account not found."}, safe=False)
 
     account.delete()
+
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Menghapus user dengan username '{account.username}'")
+    log.save()
+
     return JsonResponse({"status": "success"}, safe=False)
 
 @staff_only(redirect="/")

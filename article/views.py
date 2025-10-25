@@ -67,6 +67,14 @@ def show_detail(request, id):
 
     return render(request, "news_detail.html", context)
 
+def show_json_by_id(request, news_id):
+   try:
+       news_item = News.objects.get(pk=news_id)
+       json_data = serializers.serialize("json", [news_item])
+       return HttpResponse(json_data, content_type="application/json")
+   except News.DoesNotExist:
+       return HttpResponse(status=404)
+
 def show_json(request):
     news_list = News.objects.all()
     json_data = serializers.serialize("json", news_list)
