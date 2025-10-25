@@ -108,15 +108,6 @@
     const hotGridContainer = document.getElementById('hotGrid');
     const featuredGridContainer = document.getElementById('featuredGrid');
     const exploreGridContainer = document.getElementById('exploreGrid');
-    const showAllNewsButton = document.getElementById('filter-all');
-    const showMyNewsButton = document.getElementById('filter-my');
-    const showFeaturedButton = document.getElementById('filter-featured');
-    const showCatTransferButton = document.getElementById('filter-transfer');
-    const showCatUpdateButton = document.getElementById('filter-update');
-    const showCatMatchButton = document.getElementById('filter-match');
-    const showCatRumorButton = document.getElementById('filter-rumor');
-    const showCatExclusiveButton = document.getElementById('filter-exclusive');
-    const showCatAnalysisButton = document.getElementById('filter-analysis');
     const refresh = document.getElementById('refresh');
     const confirmDelete = document.getElementById('confirmDelete');
     const submitEdit = document.getElementById('submitEdit');
@@ -233,13 +224,13 @@
             </div>
             <div class="relative">
               <select id="dropdown" name="dropdown" class="block w-16 sm:w-32 md:w-48 lg:w-64 pl-3 pr-10 py-2 text-base border-gray-300 sm:text-sm rounded-md">
-                <option value="option1">All</option>
-                <option value="option2">Transfer</option>
-                <option value="option3">Update</option>
-                <option value="option4">Exclusive</option>
-                <option value="option5">Match</option>
-                <option value="option6">Rumor</option>
-                <option value="option7">Analysis</option>
+                <option value="all">All</option>
+                <option value="transfer">Transfer</option>
+                <option value="update">Update</option>
+                <option value="exclusive">Exclusive</option>
+                <option value="match">Match</option>
+                <option value="rumor">Rumor</option>
+                <option value="analysis">Analysis</option>
               </select>
             </div>
           </div>
@@ -252,23 +243,32 @@
             </div>
             <div class="relative">
               <select id="dropdown" name="dropdown" class="block w-16 sm:w-32 md:w-48 lg:w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                <option value="option1">All</option>
-                <option value="option2">Transfer</option>
-                <option value="option3">Update</option>
-                <option value="option4">Exclusive</option>
-                <option value="option5">Match</option>
-                <option value="option6">Rumor</option>
-                <option value="option7">Analysis</option>
+                <option value="all">All</option>
+                <option value="transfer">Transfer</option>
+                <option value="update">Update</option>
+                <option value="exclusive">Exclusive</option>
+                <option value="match">Match</option>
+                <option value="rumor">Rumor</option>
+                <option value="analysis">Analysis</option>
               </select>
             </div>
           </div>
         </div>`;
+
       document.querySelectorAll(".addArticle").forEach (button => {
         button.addEventListener('click', async function (event) {
           event.preventDefault();
           showModal();
         })
       })
+
+      const dropdown = document.getElementById('dropdown');
+      dropdown.value = activeFilter;
+      dropdown.addEventListener('change', () => {
+        activeFilter = dropdown.value; 
+        filterAndDisplayNews();
+      });
+
       articles.forEach(news => {
         const cardElement = buildNewsCardElement(news);
         if (news.fields.is_featured) {
@@ -286,19 +286,19 @@
 
     // Filter and display News
     function filterAndDisplayNews() {
-      // updateFilterButtonsAppearance();
+      let filteredNews;
       
-      const filteredNews = activeFilter === 'all' 
-        ? allNewsData 
-        : (activeFilter === 'my'
-        ? allNewsData.filter(news => Number(news.user_id) === Number(CURRENT_USER_ID))
-        : allNewsData.filter(news => news.is_featured === true));
-      
-      if (filteredNews.length === 0) {
-        displayPageSection({ showEmpty: true });
+      if (activeFilter === 'all') {
+          filteredNews = allNewsData;
       } else {
-        renderAllNewsCards(filteredNews);
-        displayPageSection({ showGrid: true });
+          filteredNews = allNewsData.filter(news => news.fields.category.toLowerCase() === activeFilter);
+      }
+
+      if (filteredNews.length === 0) {
+          displayPageSection({ showEmpty: true });
+      } else {
+          renderAllNewsCards(filteredNews);
+          displayPageSection({ showGrid: true });
       }
     }
 
@@ -324,7 +324,6 @@
         displayPageSection({ showError: true });
       }
     }
-
 
     let newsId = null;
     function attachDeleteEventListeners() {
@@ -408,21 +407,6 @@
       }
     })
 
-    // Event handlers
-    function handleShowAllNewsClick() {
-      activeFilter = 'all';
-      filterAndDisplayNews();
-    }
-
-    function handleShowMyNewsClick() {
-      activeFilter = 'my';
-      filterAndDisplayNews();
-    }
-
-    function handleShowFeaturedClick() {
-      activeFilter = 'featured';
-      filterAndDisplayNews();
-    }
 
     // Add event listener to detect new news
     document.addEventListener('newsAdded', function() {
