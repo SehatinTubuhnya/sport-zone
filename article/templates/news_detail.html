@@ -187,7 +187,7 @@ window.onload = function() {
         }
 
     // Render article content
-    function renderArticle(news, username) {
+    function renderArticle(news) {
         // Set title
         data = news[0].fields;
         newsTitle.textContent = data.title;
@@ -284,12 +284,10 @@ window.onload = function() {
         }
         
         // Set date and views
-        const formattedDate = new Date(data.created_at).toLocaleDateString('en-US', { 
+        const formattedDate = new Date(data.created_at).toLocaleDateString('id-ID', { 
             year: 'numeric', 
             month: 'long', 
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+            day: 'numeric'
         });
         
         postedDate.textContent = `    ${formattedDate}`;
@@ -307,18 +305,9 @@ window.onload = function() {
         newsContent.textContent = data.content;
         
         // Set author
-        const authorName = username || 'Anonymous';
+        const authorName = data.username || 'Anonymous';
         author.textContent = `Penulis : ${authorName}`;
     }
-
-    async function getUsername(id) {
-        const response = await fetch (`/articles/get-username-by-id/${id}`);
-        if (response.ok) {
-            const user = await response.json();
-            return user.username;
-        }
-        return "Anonymous";
-    } 
 
     async function getComments(id) {
         const response = await fetch (`/articles/get-comment-by-id/${id}`);
@@ -343,9 +332,7 @@ window.onload = function() {
             }
             
             const newsData = await response.json();
-            const username = await getUsername(newsData[0].fields.user);
-
-            renderArticle(newsData, username);
+            renderArticle(newsData);
             showState('ready');
         } catch (error) {
             console.error('Error loading news details:', error);
@@ -357,7 +344,7 @@ window.onload = function() {
         const commentElement = document.createElement('comment');
         const username = comment.fields.username;
         const content = comment.fields.content;
-        const formattedDate = new Date(comment.fields.created_at).toLocaleDateString('en-US', { 
+        const formattedDate = new Date(comment.fields.created_at).toLocaleDateString('id-ID', { 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric',
