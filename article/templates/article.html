@@ -147,8 +147,6 @@
       articleElement.className = 'bg-white border border-gray-200 hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col h-full transition-transform duration-300 hover:-translate-y-2';
 
       const detailLink = `{% url 'article:show_detail' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
-      const editLink = `{% url 'article:edit_article' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
-      const deleteLink = `{% url 'article:delete_article' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', news.pk);
 
       const title = DOMPurify.sanitize(data.title);
       const content = DOMPurify.sanitize(data.content);

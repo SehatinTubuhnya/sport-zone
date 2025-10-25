@@ -10,20 +10,17 @@ from product.models import Product
 from article.models import News
 
 from .models import ActionLog
-from .utils import admin_only
+from .utils import staff_only
 
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def homepage(request: HttpRequest):
-    log = ActionLog.objects.create(actor=request.user.username, action="Viewed admin dashboard")
-    log.save()
-
     return render(request, "admin/home.html", {})
 
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def accounts_page(request: HttpRequest):
     return render(request, "admin/accounts.html", {})
 
-@admin_only()
+@staff_only()
 def get_summary(request: HttpRequest):
     user_count = CustomUser.objects.all().count()
     article_count = News.objects.all().count()
@@ -46,7 +43,7 @@ def get_summary(request: HttpRequest):
 
     return JsonResponse(data)
 
-@admin_only()
+@staff_only()
 def get_accounts_api(request: HttpRequest):
     accounts = CustomUser.objects
 
@@ -86,7 +83,7 @@ def get_accounts_api(request: HttpRequest):
 
     return JsonResponse(result, safe=False)
 
-@admin_only()
+@staff_only()
 def add_account_api(request: HttpRequest):
     username = request.POST.get("username")
     password = request.POST.get("password")
@@ -113,7 +110,7 @@ def add_account_api(request: HttpRequest):
     return JsonResponse({"status": "success"}, safe=False)
 
 @csrf_exempt
-@admin_only()
+@staff_only()
 def edit_account_api(request: HttpRequest):
     account_id = request.POST.get("id")
     username = request.POST.get("username")
@@ -137,10 +134,13 @@ def edit_account_api(request: HttpRequest):
     account.is_seller = is_seller
     account.save()
 
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Mengedit user dengan username '{account.username}'")
+    log.save()
+
     return JsonResponse({"status": "success"}, safe=False)
 
 @csrf_exempt
-@admin_only()
+@staff_only()
 def delete_account_api(request: HttpRequest):
     account_id = request.POST.get("id")
 
@@ -150,13 +150,17 @@ def delete_account_api(request: HttpRequest):
         return JsonResponse({"status": "error", "message": "Account not found."}, safe=False)
 
     account.delete()
+
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Menghapus user dengan username '{account.username}'")
+    log.save()
+
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def action_logs_page(request: HttpRequest):
     return render(request, "admin/action-logs.html", {})
 
-@admin_only()
+@staff_only()
 def get_action_logs_api(request: HttpRequest):
     per_page = request.GET.get("per_page") or "20"
 
@@ -189,14 +193,14 @@ def get_action_logs_api(request: HttpRequest):
     return JsonResponse(result, safe=False)
 
 @csrf_exempt
-@admin_only()
+@staff_only()
 def delete_action_log_api(request: HttpRequest):
     ids = request.POST.getlist("ids")
 
     ActionLog.objects.filter(id__in=ids).delete()
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only()
+@staff_only()
 def purge_action_logs_api(request: HttpRequest):
     ActionLog.objects.all().delete()
     return JsonResponse({"status": "success"}, safe=False)

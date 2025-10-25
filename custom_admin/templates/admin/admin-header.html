@@ -4,9 +4,9 @@
 
   <script>
     const links = [
-      { text: "Summary", url: "{% url 'admin:homepage' %}" },
-      { text: "Action Logs", url: "{% url 'admin:manage_action_logs' %}" },
-      { text: "Manage Accounts", url: "{% url 'admin:manage_accounts' %}" }
+      { text: "Summary", url: "{% url 'custom_admin:homepage' %}" },
+      { text: "Action Logs", url: "{% url 'custom_admin:manage_action_logs' %}" },
+      { text: "Manage Accounts", url: "{% url 'custom_admin:manage_accounts' %}" }
     ];
 
     const currentPath = window.location.pathname;

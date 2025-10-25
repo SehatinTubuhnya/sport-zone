@@ -65,22 +65,21 @@
           </div>
           <hr class="w-full border-t border-black" />
         </div>
-        <div class="grid grid-cols-3 gap-[30px]">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-[30px]">
           {% for article in articles %}
             <div
               class="flex flex-col gap-3.5"
             >
-              <div class="h-[100px] object-cover w-full bg-gray-300 rounded-md">
-                <img src="{{ article.thumbnail }}" />
-              </div>
+              <img {% if article.thumbnail %} src="{{ article.thumbnail }}" {% endif %} class="h-[200px] object-cover w-full bg-gray-300 rounded-md" />
               <div
                 class="flex flex-col gap-[7px]"
               >
-                <p
+                <a
+                  href="{% url 'article:show_detail' article.id %}"
                   class="text-lg font-medium text-left text-[#202124]"
                 >
                   {{ article.title }}
-                </p>
+                </a>
                 <div
                   class="flex justify-start items-center gap-[11px]"
                 >
@@ -145,7 +144,7 @@
           </div>
           <hr class="w-full border-t border-black" />
         </div>
-        <div class="grid grid-cols-4 gap-[30px]">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-[30px]">
           {% for product in products %}
             <div
               class="flex flex-col gap-3.5 border border-black"

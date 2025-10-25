@@ -18,8 +18,10 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
+
 from .models import Product
 from account.models import CustomUser
+from custom_admin.models import ActionLog
 
 def delete_products(request, id):
     products = get_object_or_404(Product, pk=id)
@@ -65,20 +67,16 @@ def show_json_by_id(request, products_id):
    except Product.DoesNotExist:
        return HttpResponse(status=404)
 
-# ==========================================================
-# VIEW 1: Untuk mengambil DAFTAR produk (GET list)
-# ==========================================================
-# (View ini tidak berubah dari sebelumnya)
 @require_http_methods(["GET"])
 def product_api_view(request):
-    # ... (logika filter, sort, pagination tetap sama) ...
     queryset = Product.objects.select_related('user').all()
-    # ... (kode filter disembunyikan untuk keringkasan) ...
+
     search_query = request.GET.get('search', None)
     categories = request.GET.getlist('category') 
     min_price = request.GET.get('min_price', None)
     max_price = request.GET.get('max_price', None)
     sort_by = request.GET.get('sort', 'latest')
+
     if search_query:
         queryset = queryset.filter(Q(name__icontains=search_query) | Q(description__icontains=search_query))
     if categories:
@@ -124,22 +122,14 @@ def product_api_view(request):
         'total_pages': paginator.num_pages,
         'current_page': page_obj.number,
         'logged_in_user_id': request.user.id if request.user.is_authenticated else None,
-        'is_admin': request.user.is_staff if request.user.is_authenticated else False,
+        'is_admin': request.user.is_admin if request.user.is_authenticated else False,
         'results': results
     }
     return JsonResponse(response_data)
 
-
-# ==========================================================
-# VIEW 2: (BARU) Create Product (Hanya POST)
-# ==========================================================
 @login_required
 @require_http_methods(["POST"])
 def product_create_view(request):
-    """
-    API view hanya untuk MEMBUAT (Create) produk baru.
-    """
-    # Cek izin seller/admin
     if not (request.user.is_admin or request.user.is_seller):
          return HttpResponseForbidden(json.dumps({'error': 'Anda tidak punya izin untuk menambah produk.'}), content_type='application/json')
 
@@ -153,10 +143,12 @@ def product_create_view(request):
             thumbnail=request.POST.get('thumbnail', None) or None,
             is_featured=request.POST.get('is_featured', 'no') == "on"
         )
-        if not new_product.name or not new_product.price or not new_product.category or not new_product.description:
-            return HttpResponseBadRequest(json.dumps({'error': 'Semua field wajib (kecuali thumbnail) harus diisi.'}), content_type='application/json')
-            
+
         new_product.save()
+
+        log = ActionLog(actor=request.user.username, action=f"Membuat produk dengan nama '{new_product.name}'")
+        log.save()
+
         return JsonResponse({'success': True, 'id': new_product.id}, status=201)
     except (ValueError, TypeError):
          return HttpResponseBadRequest(json.dumps({'error': 'Data harga tidak valid.'}), content_type='application/json')
@@ -164,22 +156,10 @@ def product_create_view(request):
          return JsonResponse({'error': str(e)}, status=500)
 
 
-# ==========================================================
-# VIEW 3: (BARU) Get Product Detail (Hanya GET)
-# ==========================================================
-@login_required # Diperlukan agar user bisa mengisi form edit
+@login_required
 @require_http_methods(["GET"])
 def product_detail_view(request, pk):
-    """
-    API view hanya untuk MENDAPATKAN (Read) detail satu produk.
-    """
     product = get_object_or_404(Product, pk=pk)
-    
-    # Cek otorisasi (hanya admin/pemilik yang boleh lihat detail untuk edit)
-    is_owner = (product.user == request.user)
-    is_admin = request.user.is_staff
-    if not (is_owner or is_admin):
-         return HttpResponseForbidden(json.dumps({'error': 'Anda tidak punya izin untuk melihat detail produk ini.'}), content_type='application/json')
 
     data = {
         'id': product.id,
@@ -192,67 +172,52 @@ def product_detail_view(request, pk):
     }
     return JsonResponse(data)
 
-
-# ==========================================================
-# VIEW 4: (BARU) Update Product (Hanya POST)
-# ==========================================================
 @login_required
-@require_http_methods(["POST"]) # Menggunakan POST untuk Update
+@require_http_methods(["POST"])
 def product_update_view(request, pk):
-    """
-    API view hanya untuk MEMPERBARUI (Update) produk.
-    Menggunakan method POST.
-    """
     product = get_object_or_404(Product, pk=pk)
-    
-    # Cek otorisasi (hanya admin/pemilik)
+
     is_owner = (product.user == request.user)
-    is_admin = request.user.is_staff
+    is_admin = request.user.is_admin
     if not (is_owner or is_admin):
         return HttpResponseForbidden(json.dumps({'error': 'Anda tidak punya izin untuk mengubah produk ini.'}), content_type='application/json')
         
     try:
-        # Karena ini POST, data ada di request.POST. Ini lebih sederhana!
         data = request.POST
-        print(data.get('is_featured'))
+ 
         product.name = data.get('name')
         product.price = int(data.get('price'))
         product.category = data.get('category')
         product.description = data.get('description')
         product.thumbnail = data.get('thumbnail', None) or None
         product.is_featured = data.get('is_featured', 'no') == 'on'
-        
-        if not product.name or not product.price or not product.category or not product.description:
-            return HttpResponseBadRequest(json.dumps({'error': 'Semua field wajib (kecuali thumbnail) harus diisi.'}), content_type='application/json')
-        
         product.save()
+
+        log = ActionLog(actor=request.user.username, action=f"Mengedit produk dengan nama '{product.name}'")
+        log.save()
+
         return JsonResponse({'success': True})
     except (ValueError, TypeError):
          return HttpResponseBadRequest(json.dumps({'error': 'Data harga tidak valid.'}), content_type='application/json')
     except Exception as e:
          return JsonResponse({'error': str(e)}, status=500)
 
-
-# ==========================================================
-# VIEW 5: (BARU) Delete Product (Hanya POST)
-# ==========================================================
 @login_required
-@require_http_methods(["POST"]) # Menggunakan POST untuk Delete
+@require_http_methods(["POST"])
 def product_delete_view(request, pk):
-    """
-    API view hanya untuk MENGHAPUS (Delete) produk.
-    Menggunakan method POST.
-    """
     product = get_object_or_404(Product, pk=pk)
-    
-    # Cek otorisasi (hanya admin/pemilik)
+
     is_owner = (product.user == request.user)
-    is_admin = request.user.is_staff
+    is_admin = request.user.is_admin
     if not (is_owner or is_admin):
         return HttpResponseForbidden(json.dumps({'error': 'Anda tidak punya izin untuk menghapus produk ini.'}), content_type='application/json')
 
     try:
         product.delete()
+
+        log = ActionLog(actor=request.user.username, action=f"Menghapus produk dengan nama '{product.name}'")
+        log.save()
+
         return JsonResponse({'success': True}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)

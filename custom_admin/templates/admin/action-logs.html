@@ -61,8 +61,8 @@
     </div>
   </div>
   <script>
-    const LOGS_ENDPOINT = "{% url 'admin:get_action_logs' %}";
-    const LOGS_DEL_ENDPOINT = "{% url 'admin:delete_action_logs' %}"
+    const LOGS_ENDPOINT = "{% url 'custom_admin:get_action_logs' %}";
+    const LOGS_DEL_ENDPOINT = "{% url 'custom_admin:delete_action_logs' %}"
 
     const perPageSelect = document.getElementById("per-page-select");
     const tableBody = document.getElementById("tbody");

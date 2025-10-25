@@ -1,19 +1,16 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from article.forms import NewsForm
+from django.shortcuts import render, get_object_or_404
 from article.models import News, Comment
 
 from django.http import HttpResponse
 from django.core import serializers
 
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.utils.html import strip_tags
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 
 from account.models import CustomUser
+from custom_admin.models import ActionLog
 
 # Create your views here.
 # def edit_products(request, id):
@@ -60,18 +57,6 @@ def show_article(request):
     }
     return render(request, "article.html", context)
 
-def create_news(request):
-    form = NewsForm(request.POST or None)
-
-    if form.is_valid() and request.method == "POST":
-        news_entry = form.save(commit = False)
-        news_entry.user = request.user
-        form.save()
-        return redirect('article:show_article')
-
-    context = {'form': form}
-    return render(request, "create_news.html", context)
-
 def show_detail(request, id):
     news = get_object_or_404(News, pk=id)
     news.increment_views()
@@ -82,24 +67,6 @@ def show_detail(request, id):
 
     return render(request, "news_detail.html", context)
 
-def show_xml(request):
-     news_list = News.objects.all()
-     xml_data = serializers.serialize("xml", news_list)
-     return HttpResponse(xml_data, content_type="application/xml")
-
-def show_json(request):
-    news_list = News.objects.all()
-    json_data = serializers.serialize("json", news_list)
-    return HttpResponse(json_data, content_type="application/json")
-
-def show_xml_by_id(request, news_id):
-   try:
-       news_item = News.objects.filter(pk=news_id)
-       xml_data = serializers.serialize("xml", news_item)
-       return HttpResponse(xml_data, content_type="application/xml")
-   except News.DoesNotExist:
-       return HttpResponse(status=404)
-   
 def show_json_by_id(request, news_id):
    try:
        news_item = News.objects.get(pk=news_id)
@@ -107,7 +74,12 @@ def show_json_by_id(request, news_id):
        return HttpResponse(json_data, content_type="application/json")
    except News.DoesNotExist:
        return HttpResponse(status=404)
-   
+
+def show_json(request):
+    news_list = News.objects.all()
+    json_data = serializers.serialize("json", news_list)
+    return HttpResponse(json_data, content_type="application/json")
+
 def show_comment_json_by_news_id(request, news_id):
    try:
        comments = Comment.objects.filter(news_id=news_id).order_by('-created_at')
@@ -115,24 +87,6 @@ def show_comment_json_by_news_id(request, news_id):
        return HttpResponse(json_data, content_type="application/json")
    except News.DoesNotExist:
        return HttpResponse(status=404)
-   
-def edit_article(request, id):
-    news = get_object_or_404(News, pk=id)
-    form = NewsForm(request.POST or None, instance=news)
-    if form.is_valid() and request.method == 'POST':
-        form.save()
-        return redirect('article:show_article')
-
-    context = {
-        'form': form
-    }
-
-    return render(request, "edit_news.html", context)
-
-def delete_article(request, id):
-    news = get_object_or_404(News, pk=id)
-    news.delete()
-    return HttpResponseRedirect(reverse('article:show_article'))
 
 @csrf_exempt
 @require_POST
@@ -157,6 +111,10 @@ def add_news_entry_ajax(request):
         username=user.username
     )
     new_product.save()
+
+    log = ActionLog.objects.create(actor=user.username, action=f"Membuat artikel dengan judul '{new_product.title}'")
+    log.save()
+
     return HttpResponse(b"CREATED", status=201)
 
 @csrf_exempt
@@ -172,6 +130,10 @@ def edit_news_entry_ajax(request, news_id):
         news.is_featured = request.POST.get("is_featured", news.is_featured) == 'on'  # checkbox handling
 
         news.save()
+
+        log = ActionLog.objects.create(actor=request.user.username, action=f"Mengedit artikel dengan judul '{news.title}'")
+        log.save()
+
         return JsonResponse({'success': True})
         
     except News.DoesNotExist:
@@ -199,6 +161,10 @@ def delete_news_entry_ajax(request, news_id):
     try:
         news = News.objects.get(id=news_id, user=request.user)
         news.delete()
+
+        log = ActionLog.objects.create(actor=request.user.username, action=f"Menghapus artikel dengan judul '{news.title}'")
+        log.save()
+
         return JsonResponse({'success': True})
     except News.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
@@ -225,4 +191,8 @@ def add_comment_entry_ajax(request, news_id):
         news=news
     )
     new_comment.save()
+
+    log = ActionLog.objects.create(actor=request.user.username, action=f"Berkomentar '{new_comment.content}' pada artikel '{news.title}'")
+    log.save()
+
     return HttpResponse(b"CREATED", status=201)

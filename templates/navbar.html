@@ -11,7 +11,7 @@
       <a href="{% url 'main:home' %}">Home</a>
       <a href="{% url 'article:show_article' %}">Artikel</a>
       <a href="{% url 'product:show_products_list' %}">Produk</a>
-      {% if user.is_admin %} <a href="{% url 'admin:homepage' %}">Admin</a> {% endif %}
+      {% if user.is_admin %} <a href="{% url 'custom_admin:homepage' %}">Admin</a> {% endif %}
     </div>
     <div class="relative">
       <div class="flex justify-end items-center gap-2">
@@ -101,7 +101,7 @@
         <a href="{% url 'main:home' %}" class="border-t border-black w-full py-2 text-center">Home</a>
         <a href="{% url 'article:show_article' %}" class="border-t border-black w-full py-2 text-center">Artikel</a>
         <a href="{% url 'product:show_products_list' %}" class="border-t border-black w-full py-2 text-center">Produk</a>
-        {% if user.is_admin %} <a href="{% url 'admin:homepage' %}" class="border-t border-black w-full py-2 text-center">Admin</a> {% endif %}
+        {% if user.is_admin %} <a href="{% url 'custom_admin:homepage' %}" class="border-t border-black w-full py-2 text-center">Admin</a> {% endif %}
       </div>
       <div class="flex justify-center items-center py-2 gap-2">
         {% if user.is_authenticated %}

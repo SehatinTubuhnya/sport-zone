@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import homepage, get_accounts_api, add_account_api, delete_account_api, get_action_logs_api, accounts_page, action_logs_page, get_summary, delete_action_log_api, edit_account_api
-app_name = "admin"
+
+app_name = "custom_admin"
 
 urlpatterns = [
     path("", homepage, name="homepage"),

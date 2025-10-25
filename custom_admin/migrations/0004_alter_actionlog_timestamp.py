@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admin', '0003_alter_actionlog_id'),
+        ('custom_admin', '0003_alter_actionlog_id'),
     ]
 
     operations = [

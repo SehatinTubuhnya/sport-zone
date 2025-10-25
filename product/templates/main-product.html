@@ -234,17 +234,6 @@
         const response = await fetch(API_ENDPOINT);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         
-        /**
-         * PENTING: Asumsi struktur data response dari API (lihat views.py)
-         * {
-         * total_count: 96,
-         * total_pages: 10,
-         * current_page: 1,
-         * logged_in_user_id: 123, // ID user yang login
-         * is_admin: false,       // Status admin user yang login
-         * results: [ ...produk... ]
-         * }
-         */
         const data = await response.json();
 
         // Simpan data user yang login dari API
@@ -394,7 +383,6 @@
         }
         
         const product = await response.json();
-        console.log(product);
 
         // ... (Logika mengisi form tetap sama) ...
         modalTitle.textContent = 'Edit Produk';
@@ -468,10 +456,6 @@
 
     // Menangani hapus produk
     async function handleDeleteProduct(productId) {
-      if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
-        return;
-      }
-
       try {
         // URL BARU untuk delete, dan METHOD BARU
         const URL = "{% url 'product:api-product-delete' 1234 %}"
@@ -546,7 +530,15 @@
       if (deleteButton) {
         e.preventDefault();
         const id = deleteButton.dataset.id;
-        handleDeleteProduct(id);
+
+        showSureModal(
+          "Produk yang dihapus tidak dapat dipulihkan.",
+          "Hapus",
+          async () => {
+            await handleDeleteProduct(id);
+            hideSureModal();
+          }
+        );
       }
     });
 

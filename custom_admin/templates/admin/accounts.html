@@ -4,9 +4,9 @@
 <div class="w-full flex justify-center">
   <div class="container flex flex-col items-center p-4 mt-4">
     {% include 'admin/admin-header.html' %}
-    <div class="bg-white rounded-lg shadow-md p-6 m-4 w-full border border-gray-200">
+    <div class="bg-white rounded-lg shadow-md p-6 m-4 flex flex-col items-center gap-5 w-full border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Accounts</h2>
       <div class="w-full flex justify-between">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Accounts</h2>
         <div class="flex items-center gap-2">
             <p>Per page: </p>
             <select id="per-page-select" class="border border-black rounded-sm">
@@ -88,7 +88,7 @@
                 <div class="mb-4">
                     <div class="flex items-center">
                         <input id="is_admin" name="is_admin" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
-                        <label for="is_admin" class="ml-2 text-sm font-medium text-gray-900">Admin</label>
+                        <label for="is_admin" class="ml-2 text-sm font-medium text-gray-900">Staff</label>
                     </div>
                 </div>
                 <div class="mb-4">
@@ -115,9 +115,9 @@
     </div>
   </div>
   <script>
-    const ACCOUNTS_ENDPOINT = "{% url 'admin:get_accounts' %}";
-    const EDIT_ACCOUNT_ENDPOINT = "{% url 'admin:edit_account' %}";
-    const DEL_ACCOUNT_ENDPOINT = "{% url 'admin:delete_account' %}";
+    const ACCOUNTS_ENDPOINT = "{% url 'custom_admin:get_accounts' %}";
+    const EDIT_ACCOUNT_ENDPOINT = "{% url 'custom_admin:edit_account' %}";
+    const DEL_ACCOUNT_ENDPOINT = "{% url 'custom_admin:delete_account' %}";
 
     const perPageSelect = document.getElementById("per-page-select");
     const queryInput = document.getElementById("query");
@@ -127,6 +127,7 @@
 
     let perPage = 20;
     let page = 1;
+    let query = "";
 
     function setLoading() {
         tableBody.innerHTML = `<tr class="loading">
@@ -143,7 +144,6 @@
     async function fetchAccounts() {
         setLoading();
 
-        const query = queryInput.value;
         const data = await fetch(`${ACCOUNTS_ENDPOINT}?page=${page}&per_page=${perPage}&query=${query}`);
 
         /** @type { { total_count: number; datas: { id: string; profile_pic: string; username: string; is_admin: boolean; is_seller: boolean; is_author: boolean; }[]; } } */
@@ -247,7 +247,7 @@
             leftBtn.addEventListener("click", () => {
                 page--;
                 fetchLogs();
-            })
+            });
             pageBtns.appendChild(leftBtn);
         }
 
@@ -263,7 +263,7 @@
             rightBtn.addEventListener("click", () => {
                 page++;
                 fetchLogs();
-            })
+            });
             pageBtns.appendChild(rightBtn);
         }
     }
@@ -271,13 +271,27 @@
     fetchAccounts();
 
     perPageSelect.addEventListener("change", e => {
-        if (perPage !== +e.target.value) {
-            perPage = +e.target.value;
-            fetchAccounts();
-        }
+      if (perPage !== +e.target.value) {
+        perPage = +e.target.value;
+        fetchAccounts();
+      }
     });
+
+    queryInput.addEventListener("keypress", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        page = 1;
+        query = queryInput.value;
+        fetchAccounts();
+      }
+    });
+
     queryBtn.addEventListener("click", e => {
         e.preventDefault();
+
+        page = 1;
+        query = queryInput;
         fetchAccounts();
     });
 
