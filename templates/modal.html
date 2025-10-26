@@ -235,10 +235,9 @@
 
     document.getElementById("newsForm").reset();
     hideModal();
-        
-    // Show toast notification
+
     showToast('News added successfully!', '', 'success');
-    // Dispatch custom event to notify main.html about new data
+
     document.dispatchEvent(new CustomEvent('newsAdded'));
 
     return false;

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block meta %}
+<title>Accounts | Admin | SportZone</title>
+{% endblock meta %}
+
 {% block content %}
 <div class="w-full flex justify-center">
   <div class="container flex flex-col items-center p-4 mt-4">
@@ -151,7 +155,6 @@
 
         tableBody.innerHTML = "";
 
-        // Isi data ke tabel
         if (result.datas.length) {
             for (const data of result.datas) {
                 const roles = [];
@@ -190,7 +193,6 @@
                     ${roles.join(", ") || "No Roles"}
                 </td>`;
 
-                // TODO: Add interaction buttons here...
                 const editBtn = document.createElement("button");
                 editBtn.className = "px-3 py-2 border border-yellow-700";
                 editBtn.innerText = "Edit";
@@ -239,7 +241,6 @@
 
         const maxPage = Math.ceil(result.total_count / perPage);
 
-        // Buat tombol-tombol pagination
         if (page > 1 && page <= maxPage) {
             const leftBtn = document.createElement("button");
             leftBtn.className = "px-3 py-2 bg-slate-200 rounded-md";

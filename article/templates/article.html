@@ -1,28 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block meta %}
-<title>{{ title }}</title>
+<title>Artikel | SportZone</title>
 {% endblock meta %}
+
 {% block content %}
 <!-- head picture -->
-  <div class="w-full h-[120px] relative">
-    <img src="{% static 'images/header-img.png' %}" alt="Header Banner" class="w-full h-full object-cover" />
-     <div class="bg-white/30 backdrop-blur-sm p-3 absolute inset-0 w-full h-[120px]">
-       <div class="absolute inset-0 bg-black opacity-50"></div>
-          <div class="relative z-10 flex items-center justify-center h-full">
-            <div class="flex items-center justify-center ">
-              <div class="w-20 h-20 mx-2">
-                <img src="{% static 'image/logo.png' %}" alt="No logo available" class="w-full h-full object-contain">
-              </div>
-              <div class="text-white">
-                <p class="text-2xl font-bold">SportZone</p>
-                <p>Satu Zona untuk Semua Hal Tentang Olahraga</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  </div>
+{% include 'header.html' %}
 <div class="bg-white w-full h-full p-6">
   <div class="flex flex col items-center justify between w-full mb-4 gap-x-4">
     <div id="create" class="w-full"></div>

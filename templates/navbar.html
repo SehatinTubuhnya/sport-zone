@@ -162,20 +162,15 @@
       mobileNav.classList.add("hidden");
     });
 
-    // Pastikan elemen-elemen ini ada (hanya untuk user yang login)
     const userMenuButton = document.getElementById('user-menu-button');
     const userMenuDropdown = document.getElementById('user-menu-dropdown');
 
     if (userMenuButton && userMenuDropdown) {
-      
-      // 1. Tampilkan/sembunyikan menu ketika tombol diklik
       userMenuButton.addEventListener('click', () => {
         userMenuDropdown.classList.toggle('hidden');
       });
 
-      // 2. Sembunyikan menu jika pengguna mengklik di luar area menu
       document.addEventListener('click', (event) => {
-        // Cek apakah klik terjadi di luar tombol DAN di luar menu
         if (
           !userMenuButton.contains(event.target) &&
           !userMenuDropdown.contains(event.target)
