@@ -43,4 +43,5 @@ class Comment(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
     username = models.CharField(max_length=100, default='')
+    profile_pic = models.URLField(default='')
     news = models.ForeignKey(News, on_delete=models.CASCADE, null=True)

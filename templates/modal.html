@@ -71,13 +71,13 @@
   </div>
 
 
-  <div id="confirm" class="hidden w-400 h-200 bg-yellow-500 rounded">
+  <div id="confirm" class="hidden w-400 h-200 bg-white rounded">
     <div class="flex flex-col items-center justify-center">
-      <div class="mx-10 mt-6 text-white text-2xl font-bold">Are you sure you want to </div>
-      <div class="text-2xl text-white font-bold mb-10">delete this news?</div>
+      <div class="mx-10 mt-6 text-black text-2xl">Apakah anda yakin ingin </div>
+      <div class="text-2xl text-black mb-10">delete artikel ini?</div>
       <div class="mx-10 mb-6 flex flex-row justify-between" >
+        <button class="bg-white text-black hover:bg-gray-200 rounded border border-gray-500 px-3 py-1 mx-4" onclick="hideConfirmModal()">Cancel</button>
         <button id="confirmDelete" class="bg-blue-800 text-white hover:bg-red-600 rounded px-3 py-1 mx-4">Delete</button>
-        <button class="bg-white text-black hover:bg-gray-200 rounded px-3 py-1 mx-4" onclick="hideConfirmModal()">Cancel</button>
       </div>
     </div>
   </div>

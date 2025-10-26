@@ -92,23 +92,26 @@
                     <p class="text-2xl">Komentar</p>
                 </div>
 
-                <div class="w-full bg-gray-100 rounded shadow-sm border border-gray-200 mb-6 p-4">
-                    <div class="flex flex-row">
-                        <img src="https://placehold.co/40x40/E0E0E0/333333?text=Me" class="w-10 h-10 rounded-full mr-4" alt="My Avatar">
-                        <div class="w-full">
-                            <form id="commentForm">
-                                <textarea id="writeComment" rows="3" name="content" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black" placeholder="Tulis komentar Anda..."></textarea>
-                            </form>
-                            <button type="button" id="submitComment" form="commentForm" class="mt-2 bg-black text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
-                                Kirim
-                            </button>
+                {% if user.is_authenticated %}
+                    <div class="w-full bg-gray-100 rounded shadow-sm border border-gray-200 mb-6 p-4">
+                        <div class="flex flex-row">
+                            <img src="https://placehold.co/40x40/E0E0E0/333333?text=Me" class="w-10 h-10 rounded-full mr-4" alt="My Avatar">
+                            <div class="w-full">
+                                <form id="commentForm">
+                                    <textarea id="writeComment" rows="3" name="content" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-black focus:border-black" placeholder="Tulis komentar Anda..."></textarea>
+                                </form>
+                                <button type="button" id="submitComment" form="commentForm" class="mt-2 bg-black text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-gray-800">
+                                    Kirim
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
+
+                <!-- posted comments -->
+                <div id="commentCards"></div>
             </div>
 
-            <!-- posted comments -->
-            <div id="commentCards"></div>
         </article>
     </div>
 </div>
@@ -120,7 +123,11 @@ const NEWS_DETAIL_ENDPOINT = `{% url 'article:show_json_by_id' '00000000-0000-00
 const CURRENT_USER_ID = "{{ user.id|default_if_none:'' }}";
 const IS_ADMIN = "{{ user.is_admin|lower }}" === 'true';
 const IS_AUTHOR = "{{ user.is_author|lower }}" === 'true';
+const IS_SELLER = "{{ user.is_seller|lower }}" === 'true';
 const USERNAME = "{{ user.username|lower }}" === 'true';
+const PROFILE_PICTURE = "{{ user.profile_pic }}"
+console.log("PP URL = " + PROFILE_PICTURE);
+console.log("PP URL = " + (PROFILE_PICTURE === true));
 
 window.onload = function() {
     // DOM Elements
@@ -140,7 +147,7 @@ window.onload = function() {
     const editDeleteBtn = document.getElementById('editDeleteBtn');
     const submitEdit = document.getElementById('submitEdit');
     const commentCards = document.getElementById('commentCards');
-
+    const submitComment = document.getElementById("submitComment");
 
     // Show/hide page sections
     function showState(state) {
@@ -341,9 +348,10 @@ window.onload = function() {
     }
 
     function buildCommentCard(comment) {
-        const commentElement = document.createElement('comment');
+        const commentElement = document.createElement('div');
         const username = comment.fields.username;
         const content = comment.fields.content;
+        const profile_pic_url = comment.fields.profile_pic || '/static/image/pp.png';
         const formattedDate = new Date(comment.fields.created_at).toLocaleDateString('id-ID', { 
             year: 'numeric', 
             month: 'long', 
@@ -356,12 +364,19 @@ window.onload = function() {
         // make the profile picture h-10 w-10 there later
         const completeCardHtml = `
             <div class="m-4 p-4 rounded-md border border-1 border-gray-600 hover:shadow-md transition-transform duration-300 hover:-translate-y-1">
-                <div flex flex row>
-                    <div class="w-full flex flex-row justify-between">
-                        <p class="text-lg text-black" mx-3>${username}</p>
-                        <p class="text-lg text-gray-600 italic mx-3">${formattedDate}</p>
+                <div class="flex flex-col">
+                    <div class="w-full flex flex-row items-center justify-between mb-3">
+                        <div class="flex flex-row items-center">
+                            <div class="w-10 h-10 rounded-full mr-4 overflow-hidden">
+                                <img src = "${profile_pic_url}" class="w-full h-full object-cover">
+                            </div>
+                            <p class="text-lg text-black" mx-3>${username}</p>
+                        </div>
+                        <div>
+                            <p class="text-lg text-gray-600 italic mx-3">${formattedDate}</p>
+                        </div>
                     </div>
-                    <hr bg-gray-600 border border-0>
+                    <hr class="bg-gray-600 border border-gray-500">
                     <p class="text-lg text-black mt-4">${content}</p>
                 </div>
             </div>
@@ -395,10 +410,12 @@ window.onload = function() {
         return false;
     }
 
-    document.getElementById("submitComment").addEventListener("click", function(e) {
+    if (submitComment) {
+        submitComment.addEventListener("click", function(e) {
         e.preventDefault();
         addComment();
-    })
+        })
+    }
 
     async function loadComments() {
         try {
@@ -412,7 +429,7 @@ window.onload = function() {
             }
             const newsData = await response.json();
             const comments = await getComments(newsData[0].pk) || [];
-            renderAllComments(comments)
+            renderAllComments(comments);
             showState('ready');
         } catch (error) {
             console.error('Error loading comments : ', error);

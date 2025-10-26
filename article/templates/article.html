@@ -215,7 +215,7 @@
       hotGridContainer.innerHTML = '';
       exploreGridContainer.innerHTML = '';
       createBtn.innerHTML = '';
-      createBtn.innerHTML = (true) ? `
+      createBtn.innerHTML = (IS_ADMIN || IS_AUTHOR) ? `
         <div class="w-full rounded flex flex-row items-center justify-between p-4 bg-black"> 
           <button class="addArticle bg-white text-black hover:bg-gray-200 transition-colors px-4 py-1 rounded-md">Buat Artikel</button>
           <div class="flex flex-row items-center">
