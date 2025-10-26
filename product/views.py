@@ -17,6 +17,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
 from .models import Product
@@ -54,10 +55,10 @@ def create_products(request):
     context = {'form': form}
     return render(request, "create_products.html", context)
 
-def show_products(request, id):
-    products = get_object_or_404(Product, pk=id)
+def show_product_detail(request, id):
+    get_object_or_404(Product, pk=id)
 
-    return render(request, "products_detail.html")
+    return render(request, "product-detail.html", { "id": id })
 
 def show_json_by_id(request, products_id):
    try:
@@ -127,6 +128,7 @@ def product_api_view(request):
     }
     return JsonResponse(response_data)
 
+@csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def product_create_view(request):
@@ -155,23 +157,28 @@ def product_create_view(request):
     except Exception as e:
          return JsonResponse({'error': str(e)}, status=500)
 
-
-@login_required
 @require_http_methods(["GET"])
 def product_detail_view(request, pk):
-    product = get_object_or_404(Product, pk=pk)
+    product = get_object_or_404(Product.objects.select_related("user"), pk=pk)
 
     data = {
         'id': product.id,
         'name': product.name,
         'price': product.price,
+        'category_display': product.get_category_display(),
         'category': product.category,
         'description': product.description,
         'thumbnail': product.thumbnail or '',
-        'is_featured': product.is_featured
+        'is_featured': product.is_featured,
+        'can_manage': (request.user.is_admin or request.user == product.user) if request.user.is_authenticated else False,
+        'seller': {
+            'username': product.user.username if product.user else "Toko Resmi",
+            'profile_pic': product.user.profile_pic if product.user else ""
+        }
     }
     return JsonResponse(data)
 
+@csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def product_update_view(request, pk):
@@ -202,6 +209,7 @@ def product_update_view(request, pk):
     except Exception as e:
          return JsonResponse({'error': str(e)}, status=500)
 
+@csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def product_delete_view(request, pk):

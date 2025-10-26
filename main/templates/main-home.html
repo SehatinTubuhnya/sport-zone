@@ -8,15 +8,7 @@
 
 {% block content %}
 <div>
-  <div class="w-full relative h-[120px]">
-    <img src="{% static 'images/header-img.png' %}" alt="Header Banner" class="w-full h-full object-cover" />
-    <div class="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center">
-      <div class="flex flex-col items-center gap-2">
-        <h1 class="text-white text-2xl font-medium text-center">SportZone</h1>
-        <p class="text-white text-center">Satu Zona untuk Semua Hal tentang Olahraga</p>
-      </div>
-    </div>
-  </div>
+  {% include 'header.html' %}
   <div class="flex flex-col md:flex-row w-full gap-12 px-12 py-[42px]">
     <div class="flex w-full flex-col gap-[35px]">
       <div class="flex flex-col gap-[30px]">
@@ -151,44 +143,20 @@
             >
               <img src="{{ product.thumbnail }}" class="h-[200px] object-cover w-full bg-gray-300 rounded-md" />
               <div
-                class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[254px] relative gap-[7px] pl-2.5"
+                class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[254px] relative gap-[7px] px-2 py-3"
               >
-                <p
+                <a
+                  href="{% url 'product:show_product_detail' product.id %}"
                   class="self-stretch flex-grow-0 flex-shrink-0 w-[244px] text-lg font-medium text-left text-[#202124]"
                 >
                   {{ product.name }}
-                </p>
+                </a>
                 <div
                   class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[11px]"
                 >
                   <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">
                     Rp {{ product.price|intcomma }}
                   </p>
-                </div>
-                <div
-                  class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[5px] py-0.5"
-                >
-                  <div
-                    class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-0.5"
-                  >
-                    <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">4.9</p>
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 12 12"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="flex-grow-0 flex-shrink-0 w-3 h-3 relative"
-                      preserveAspectRatio="xMidYMid meet"
-                    >
-                      <path
-                        d="M5.07188 3.31377C5.46519 2.33327 5.66184 1.84302 6 1.84302C6.33816 1.84302 6.53482 2.33327 6.92812 3.31377L6.94643 3.35942C7.16863 3.91336 7.27973 4.19033 7.50615 4.35867C7.73258 4.52701 8.0298 4.55363 8.62426 4.60687L8.73173 4.6165C9.70464 4.70363 10.1911 4.74719 10.2952 5.05669C10.3993 5.36618 10.038 5.69485 9.31549 6.35219L9.07435 6.57158C8.70859 6.90434 8.52572 7.07072 8.44048 7.28878C8.42458 7.32946 8.41136 7.37114 8.40091 7.41354C8.34488 7.64087 8.39844 7.88224 8.50554 8.36497L8.53888 8.51523C8.73572 9.4024 8.83413 9.84598 8.66229 10.0373C8.59808 10.1088 8.51463 10.1603 8.42192 10.1856C8.17382 10.2533 7.82158 9.96626 7.1171 9.39221C6.65452 9.01527 6.42322 8.8268 6.15767 8.7844C6.05322 8.76772 5.94678 8.76772 5.84233 8.7844C5.57678 8.8268 5.34548 9.01527 4.8829 9.39221C4.17842 9.96626 3.82618 10.2533 3.57808 10.1856C3.48537 10.1603 3.40192 10.1088 3.33771 10.0373C3.16587 9.84598 3.26429 9.4024 3.46112 8.51523L3.49446 8.36497C3.60157 7.88224 3.65512 7.64087 3.59909 7.41354C3.58864 7.37114 3.57542 7.32946 3.55952 7.28878C3.47428 7.07072 3.29141 6.90434 2.92565 6.57158L2.68451 6.35219C1.96199 5.69485 1.60073 5.36618 1.70482 5.05669C1.80891 4.74719 2.29536 4.70363 3.26827 4.6165L3.37574 4.60687C3.9702 4.55363 4.26743 4.52701 4.49385 4.35867C4.72028 4.19033 4.83137 3.91336 5.05357 3.35942L5.07188 3.31377Z"
-                        stroke="#222222"
-                      ></path>
-                    </svg>
-                  </div>
-                  <div class="flex-grow-0 flex-shrink-0 w-2.5 h-px bg-black"></div>
-                  <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">50 Terjual</p>
                 </div>
               </div>
             </div>

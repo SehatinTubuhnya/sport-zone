@@ -39,7 +39,7 @@ def detect_category_from_content(content: str) -> str:
 
     # Define mapping from keywords → category
     category_keywords = {
-        'Rransfer': ['transfer', 'pindah', 'bergabung', 'kontrak baru'],
+        'Transfer': ['transfer', 'pindah', 'bergabung', 'kontrak baru'],
         'Match': ['pertandingan', 'kalah', 'menang', 'skor', 'hasil laga'],
         'Rumor': ['rumor', 'isu', 'dikabarkan', 'gosip'],
         'Analysis': ['analisis', 'strategi', 'taktik', 'evaluasi'],

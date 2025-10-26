@@ -82,7 +82,7 @@ def show_json(request):
 
 def show_comment_json_by_news_id(request, news_id):
    try:
-       comments = Comment.objects.filter(news_id=news_id).order_by('-created_at')
+       comments = Comment.objects.filter(news_id=news_id).order_by('-created_at').select_related("user")
        json_data = serializers.serialize("json", comments)
        return HttpResponse(json_data, content_type="application/json")
    except News.DoesNotExist:
