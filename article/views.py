@@ -169,10 +169,10 @@ def delete_news_entry_ajax(request, news_id):
     except News.DoesNotExist:
         return JsonResponse({'error': 'Product not found'}, status=404)
     
-def get_username_by_id(request, id):
+def get_user_by_id(request, id):
     try:
         user = CustomUser.objects.get(pk=id)
-        return JsonResponse({"id": user.id, "username": user.username})
+        return JsonResponse({"id": user.id, "username": user.username, "pp":user.profile_pic})
     except CustomUser.DoesNotExist:
         return JsonResponse({"error": "User not found"}, status=404)
     
@@ -182,13 +182,15 @@ def add_comment_entry_ajax(request, news_id):
     content = strip_tags(request.POST.get("content"))
     user = request.user
     username = user.username
+    profile_pic = user.profile_pic
     news = News.objects.get(pk=news_id)
 
     new_comment = Comment(
-        content=content,
-        user=user,
-        username=username,
-        news=news
+        content = content,
+        user = user,
+        username = username,
+        profile_pic = profile_pic,
+        news = news
     )
     new_comment.save()
 
