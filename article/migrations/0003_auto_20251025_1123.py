@@ -19,14 +19,11 @@ def parse_indonesian_date(date_str: str):
     }
 
     try:
-        # Get the main part after the comma: "05 Okt 2025 08:10 WIB"
         parts = date_str.split(",")[-1].strip()
-        # Extract day, month abbreviation, and year
         day, month_abbr, year, *_ = parts.split()
         month = bulan_map.get(month_abbr, 1)
 
         naive_dt = datetime(int(year), month, int(day))
-        # Make it timezone aware using your default timezone
         aware_dt = timezone.make_aware(naive_dt, timezone.get_default_timezone())
         return aware_dt
     except Exception as e:
@@ -37,7 +34,6 @@ def detect_category_from_content(content: str) -> str:
     """Detect news category from the article content."""
     content_lower = content.lower()
 
-    # Define mapping from keywords → category
     category_keywords = {
         'Transfer': ['transfer', 'pindah', 'bergabung', 'kontrak baru'],
         'Match': ['pertandingan', 'kalah', 'menang', 'skor', 'hasil laga'],
@@ -47,17 +43,15 @@ def detect_category_from_content(content: str) -> str:
         'Update': ['update', 'terbaru', 'hari ini'],
     }
 
-    # Try to find the first category that matches any keyword
     for category, keywords in category_keywords.items():
         if any(keyword in content_lower for keyword in keywords):
             return category
 
-    # Default if nothing matches
     return 'Update'
 
 def load_news_data(apps, schema_editor):
     News = apps.get_model('article', 'News')
-    CustomUser = apps.get_model('account', 'CustomUser')  # adjust app name if different
+    CustomUser = apps.get_model('account', 'CustomUser')
 
     data_path = Path(__file__).resolve().parent.parent / 'fixtures' / 'articles.json'
     if not data_path.exists():
@@ -72,22 +66,19 @@ def load_news_data(apps, schema_editor):
         "tak disangka", "sorot", "terbaru", "hot", "panas", "hangat", "rekor"
     ]
 
-    # Try assigning data to fields properly
     for entry in data:
         title = entry.get("title", "Untitled")
-        content = strip_tags("\n".join(entry.get("html_contents", [])))  # combine list into one text block
+        content = strip_tags("\n".join(entry.get("html_contents", [])))
         thumbnail = entry.get("img_url", "")
         author_name = entry.get("author", "Anonymous")
         created_time = parse_indonesian_date(entry.get("time", None))
         tags = ", ".join(entry.get("tags", []))
-        
-        # Choose category dynamically or set default
+
         category = detect_category_from_content(content)
         sports_type = "Other"
         is_featured = any(keyword in title.lower() for keyword in featured_keywords)
         tags = entry.get("tags", [])
 
-        # Detect sports type dynamically — look for known sports keywords
         for tag in tags:
             tag_lower = tag.lower()
             if any(keyword in tag_lower for keyword in ["bulutangkis", "badminton", "football", "basket", 
@@ -95,9 +86,8 @@ def load_news_data(apps, schema_editor):
                                                         "sambo", "polo", "besi", "boxing", "pbsi", "f1",
                                                         "mma", "bela"]):
                 sports_type = tag.capitalize()
-                break  # stop once we find one
-        
-        # Optional: find a user for the author (fallback to first admin or None)
+                break
+
         user = CustomUser.objects.filter(is_staff=True).first()
         
         news_item = News.objects.create(

@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
+
+{% block meta %}
+<title>Profil | SportZone</title>
+{% endblock meta %}
+
 {% load static %} {% block content %}
 
 <main class="container mx-auto p-4 mt-4">
@@ -123,9 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) throw new Error('Gagal memuat data profil');
       
       const data = await response.json();
-      currentProfileData = data; // Simpan data di cache
+      currentProfileData = data;
 
-      // Render bagian-bagian halaman
+      document.querySelector("title").innerText = `${data.username} | SportZone`;
+
       renderProfileSidebar(data);
       renderProfileTabs(data);
       
@@ -138,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- 3. Fungsi Render Sidebar & Tabs ---
   function renderProfileSidebar(data) {
     const defaultPic = 'https://placehold.co/150x150/E2E8F0/A0AEC0?text=No+Image';
     const profilePic = data.profile_pic || defaultPic;
@@ -212,9 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
     tabNavContainer.innerHTML = tabsHTML;
   }
 
-
-  // --- 4. Fungsi Fetch Konten Tab ---
-  // (Fungsi ini dan helper render-nya tidak berubah)
   async function fetchTabContent(tabName, userId) {
     tabContent.innerHTML = `<div class="text-center py-10 text-gray-500">Memuat ${tabName}...</div>`;
     
@@ -239,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
       productGrid += `
         <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
           <img src="${product.thumbnail || '...'}" alt="${product.name}" class="w-full h-48 object-contain mb-4 rounded">
-          <h3 class="font-semibold text-gray-800 truncate">${product.name}</h3>
+          <a href="${"{% url 'product:show_product_detail' 1234 %}".replace("1234", product.id)}" class="font-semibold text-gray-800 truncate">${product.name}</a>
           <p class="text-lg font-bold text-black mt-1">${formatter.format(product.price)}</p>
         </div>`;
     });
@@ -256,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     articles.forEach(article => {
       articleList += `
         <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
-          <h3 class="text-xl font-bold text-gray-900">${article.title}</h3>
+          <a href="${"{% url 'article:show_detail' 1234 %}".replace("1234", article.id)}" class="text-xl font-bold text-gray-900">${article.title}</a>
           <p class="text-sm text-gray-500 mb-2">Dipublikasi pada: ${new Date(article.created_at).toLocaleDateString('id-ID', { dateStyle: 'long' })}</p>
           <p class="text-gray-700">${article.snippet}...</p>
         </div>
@@ -267,17 +269,13 @@ document.addEventListener('DOMContentLoaded', () => {
     tabContent.innerHTML = articleList;
   }
   function renderAbout(aboutData) {
-    // aboutData (dari view) bisa berisi HTML atau teks
     tabContent.innerHTML = `<p class="text-gray-700 leading-relaxed">${aboutData}</p>`;
   }
 
-
-  // --- 5. Fungsi Modal & Form ---
   function showModal() {
-    // Reset pesan error/sukses
     formMessage.classList.add('hidden');
     formMessage.textContent = '';
-    // Isi form sudah dilakukan saat renderProfileSidebar
+
     profileEditModal.classList.remove('hidden');
   }
   function hideModal() {
@@ -306,23 +304,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Gagal menyimpan.');
 
-      // SUKSES!
       formMessage.textContent = 'Perubahan berhasil disimpan!';
       formMessage.className = 'text-sm text-green-600';
       formMessage.classList.remove('hidden');
-      
-      // Reset field password
+
       document.getElementById('form-new-password').value = '';
       document.getElementById('form-confirm-password').value = '';
-      
-      // Tutup modal setelah 1 detik
+
       setTimeout(hideModal, 1000);
 
-      // =======================================================
-      // === INI JAWABAN REQUEST 1: REFRESH DATA OTOMATIS ===
-      // =======================================================
-      // Panggil ulang fetchProfileData untuk me-refresh
-      // seluruh sidebar dengan data baru.
       fetchProfileData(profileUsername);
 
     } catch (error) {

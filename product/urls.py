@@ -13,21 +13,9 @@ urlpatterns = [
     path('<uuid:id>/edit', edit_products, name='edit_products'),
     path('<uuid:id>/delete', delete_products, name='delete_products'),
 
-    # 1. URL untuk halaman (yang me-load HTML)
-    # path('products/', views.product_list_page_view, name='product-list-page'), 
-    
-    # 2. URL API untuk mengambil DAFTAR produk (GET)
     path('api/products/', views.product_api_view, name='api-product-list'),
-    
-    # 3. URL API untuk MEMBUAT produk (POST)
     path('api/products/create/', views.product_create_view, name='api-product-create'),
-    
-    # 4. URL API untuk GET detail produk (GET)
     path('api/products/<int:pk>/', views.product_detail_view, name='api-product-detail'),
-
-    # 5. URL API untuk UPDATE produk (POST)
     path('api/products/<int:pk>/update/', views.product_update_view, name='api-product-update'),
-    
-    # 6. URL API untuk DELETE produk (POST)
     path('api/products/<int:pk>/delete/', views.product_delete_view, name='api-product-delete'),
 ]

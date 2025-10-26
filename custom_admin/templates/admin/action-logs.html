@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% block meta %}
+<title>Action Logs | Admin | SportZone</title>
+{% endblock meta %}
+
 {% block content %}
 <div class="w-full flex justify-center">
   <div class="container flex flex-col items-center p-4 mt-4">
@@ -93,7 +97,6 @@
 
         tableBody.innerHTML = "";
 
-        // Isi data ke tabel
         if (result.datas.length) {
             for (const data of result.datas) {
                 const row = document.createElement("tr");
@@ -101,7 +104,6 @@
                 <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">${data.actor}</td>
                 <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">${data.action}</td>`;
 
-                // TODO: Add interaction buttons here...
                 const delBtn = document.createElement("button");
                 delBtn.className = "px-3 py-2 border border-red-700";
                 delBtn.innerText = "Hapus";
@@ -141,7 +143,6 @@
 
         const maxPage = Math.ceil(result.total_count / perPage);
 
-        // Buat tombol-tombol pagination
         if (page > 1 && page <= maxPage) {
             const leftBtn = document.createElement("button");
             leftBtn.className = "px-3 py-2 bg-slate-200 rounded-md";

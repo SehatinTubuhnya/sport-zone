@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block meta %}
-  <title>Daftar Produk | SportZone</title>
+<title>Daftar Produk | SportZone</title>
 {% endblock meta %}
 
 {% block content %}
@@ -172,7 +172,6 @@
     let currentUserId = null;
     let isUserAdmin = false;
 
-    // Format mata uang
     const formatter = new Intl.NumberFormat('id-ID', {
       style: 'currency',
       currency: 'IDR',
@@ -378,7 +377,7 @@
 
       try {
         const response = await fetch(url, {
-          method: "POST", // Selalu 'POST'
+          method: "POST",
           body: formData
         });
 
@@ -427,7 +426,6 @@
       fetchProducts(1); 
     });
 
-    // Pagination (delegation)
     paginationContainer.addEventListener('click', (e) => {
       e.preventDefault(); 
       const target = e.target.closest('a[data-page]');
@@ -440,18 +438,14 @@
       }
     });
 
-    // Modal Triggers
-    // Hanya tambahkan listener jika tombolnya ada
     if (addProductBtn) {
       addProductBtn.addEventListener('click', openModalForAdd);
     }
     modalCloseBtn.addEventListener('click', hideModal);
     modalCancelBtn.addEventListener('click', hideModal);
 
-    // Modal Form Submit
     productForm.addEventListener('submit', handleFormSubmit);
 
-    // Grid: Edit & Delete (delegation)
     productGrid.addEventListener('click', (e) => {
       const editButton = e.target.closest('.edit-btn');
       const deleteButton = e.target.closest('.delete-btn');
@@ -477,7 +471,6 @@
       }
     });
 
-    // --- 7. Panggilan Awal ---
     fetchProducts(1);
 
   });
