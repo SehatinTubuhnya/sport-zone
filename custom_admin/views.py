@@ -3,21 +3,47 @@ from django.http import HttpRequest, JsonResponse
 from django.core.paginator import Paginator
 from django.db.models import Q
 
+from django.views.decorators.csrf import csrf_exempt
+
 from account.models import CustomUser
 from product.models import Product
+from article.models import News
 
 from .models import ActionLog
-from .utils import admin_only
+from .utils import staff_only
 
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def homepage(request: HttpRequest):
     return render(request, "admin/home.html", {})
 
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def accounts_page(request: HttpRequest):
     return render(request, "admin/accounts.html", {})
 
-@admin_only()
+@staff_only()
+def get_summary(request: HttpRequest):
+    user_count = CustomUser.objects.all().count()
+    article_count = News.objects.all().count()
+    product_count = Product.objects.all().count()
+    recent_logs = ActionLog.objects.order_by("-timestamp").all()[:5]
+
+    data = {
+        "user_count": user_count,
+        "article_count": article_count,
+        "product_count": product_count,
+        "recent_logs": [
+            {
+                "timestamp": log.timestamp,
+                "actor": log.actor,
+                "action": log.action
+            }
+            for log in recent_logs
+        ]
+    }
+
+    return JsonResponse(data)
+
+@staff_only()
 def get_accounts_api(request: HttpRequest):
     accounts = CustomUser.objects
 
@@ -41,9 +67,23 @@ def get_accounts_api(request: HttpRequest):
     page = request.GET.get("page")
     datas = paginator.get_page(page)
 
-    return JsonResponse(datas, safe=False)
+    result = {
+        "total_count": accounts.count(),
+        "datas": [
+            {
+                "id": data.id,
+                "profile_pic": data.profile_pic,
+                "username": data.username,
+                "is_admin": data.is_admin,
+                "is_author": data.is_author,
+                "is_seller": data.is_seller
+            } for data in datas
+        ]
+    }
 
-@admin_only()
+    return JsonResponse(result, safe=False)
+
+@staff_only()
 def add_account_api(request: HttpRequest):
     username = request.POST.get("username")
     password = request.POST.get("password")
@@ -69,31 +109,38 @@ def add_account_api(request: HttpRequest):
     account.save()
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only
+@csrf_exempt
+@staff_only()
 def edit_account_api(request: HttpRequest):
     account_id = request.POST.get("id")
     username = request.POST.get("username")
+    profile_pic = request.POST.get("profile_pic")
     password = request.POST.get("password")
-    is_admin = request.POST.get("is_admin") == "true"
-    is_author = request.POST.get("is_author") == "true"
-    is_seller = request.POST.get("is_seller") == "true"
+    is_admin = request.POST.get("is_admin") == "on"
+    is_author = request.POST.get("is_author") == "on"
+    is_seller = request.POST.get("is_seller") == "on"
 
     try:
         account = CustomUser.objects.get(id=account_id)
     except CustomUser.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Account not found."}, safe=False)
+        return JsonResponse({"status": "error", "message": "Account not found."}, safe=False, status=400)
 
     account.username = username
     if password:
         account.set_password(password)
+    account.profile_pic = profile_pic
     account.is_admin = is_admin
     account.is_author = is_author
     account.is_seller = is_seller
     account.save()
 
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Mengedit user dengan username '{account.username}'")
+    log.save()
+
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only()
+@csrf_exempt
+@staff_only()
 def delete_account_api(request: HttpRequest):
     account_id = request.POST.get("id")
 
@@ -103,72 +150,17 @@ def delete_account_api(request: HttpRequest):
         return JsonResponse({"status": "error", "message": "Account not found."}, safe=False)
 
     account.delete()
-    return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only(redirect="/")
-def products_page(request: HttpRequest):
-    return render(request, "admin/products.html", {})
-
-@admin_only()
-def get_products_api(request: HttpRequest):
-    products = Product.objects
-
-    query = request.GET.get("query")
-    if query:
-        products = products.filter(Q(name__icontains=query) | Q(description__icontains=query) | Q(category__icontains=query) | Q(user__username__icontains=query))
-
-    per_page = request.GET.get("per_page") or "20"
-
-    try:
-        per_page = int(per_page)
-
-        if per_page < 1:
-            per_page = 20
-    except:
-        per_page = 20
-
-    products = products.order_by("name").all()
-    paginator = Paginator(products, per_page=per_page)
-
-    page = request.GET.get("page")
-    datas = paginator.get_page(page)
-
-    return JsonResponse(datas, safe=False)
-
-@admin_only()
-def edit_product_api(request: HttpRequest):
-    product_id = request.POST.get("id")
-    name = request.POST.get("name")
-    description = request.POST.get("description")
-    price = request.POST.get("price")
-    category = request.POST.get("category")
-    is_featured = request.POST.get("is_featured") == "true"
-
-    try:
-        product = Product.objects.get(id=product_id)
-    except Product.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Product not found."}, safe=False)
-
-    product.name = name
-    product.description = description
-    product.price = price
-    product.category = category
-    product.is_featured = is_featured
-    product.save()
+    log = ActionLog.objects.create(actor = request.user.username, action = f"Menghapus user dengan username '{account.username}'")
+    log.save()
 
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only()
-def delete_product_api(request: HttpRequest):
-    ids = request.POST.getlist("ids")
-    Product.objects.filter(id__in=ids).delete()
-    return JsonResponse({"status": "success"}, safe=False)
-
-@admin_only(redirect="/")
+@staff_only(redirect="/")
 def action_logs_page(request: HttpRequest):
-    return render(request, "admin/action_logs.html", {})
+    return render(request, "admin/action-logs.html", {})
 
-@admin_only()
+@staff_only()
 def get_action_logs_api(request: HttpRequest):
     per_page = request.GET.get("per_page") or "20"
 
@@ -180,22 +172,35 @@ def get_action_logs_api(request: HttpRequest):
     except:
         per_page = 20
 
-    logs = ActionLog.objects.all()
+    logs = ActionLog.objects.order_by("-timestamp").all()
     paginator = Paginator(logs, per_page=per_page)
 
     page = request.GET.get("page")
     datas = paginator.get_page(page)
 
-    return JsonResponse(datas, safe=False)
+    result = {
+        "total_count": logs.count(),
+        "datas": [
+            {
+                "id": log.id,
+                "timestamp": log.timestamp,
+                "actor": log.actor,
+                "action": log.action
+            } for log in datas
+        ]
+    }
 
-@admin_only()
+    return JsonResponse(result, safe=False)
+
+@csrf_exempt
+@staff_only()
 def delete_action_log_api(request: HttpRequest):
     ids = request.POST.getlist("ids")
 
     ActionLog.objects.filter(id__in=ids).delete()
     return JsonResponse({"status": "success"}, safe=False)
 
-@admin_only()
+@staff_only()
 def purge_action_logs_api(request: HttpRequest):
     ActionLog.objects.all().delete()
     return JsonResponse({"status": "success"}, safe=False)

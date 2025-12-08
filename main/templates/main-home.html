@@ -1,16 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
+
+{% block meta %}
+<title>SportZone</title>
+{% endblock meta%}
+
 {% block content %}
 <div>
-  <div class="w-full relative h-[120px]">
-    <img src="{% static 'images/header-img.png' %}" alt="Header Banner" class="w-full h-full object-cover" />
-    <div class="absolute inset-0 bg-black bg-opacity-60 flex justify-center items-center">
-      <div class="flex flex-col items-center gap-2">
-        <h1 class="text-white text-2xl font-medium text-center">SportZone</h1>
-        <p class="text-white text-center">Satu Zona untuk Semua Hal tentang Olahraga</p>
-      </div>
-    </div>
-  </div>
+  {% include 'header.html' %}
   <div class="flex flex-col md:flex-row w-full gap-12 px-12 py-[42px]">
     <div class="flex w-full flex-col gap-[35px]">
       <div class="flex flex-col gap-[30px]">
@@ -19,7 +17,7 @@
             <p class="text-2xl font-medium text-left uppercase text-[#202124]">
               Artikel Terbaru
             </p>
-            <div class="flex justify-start items-end relative gap-[5px]">
+            <a href="{% url 'article:show_article' %}" class="flex justify-start items-end relative gap-[5px]">
               <p class="text-sm text-left text-[#202124]">View All</p>
               <svg
                 width="20"
@@ -55,85 +53,38 @@
                   </clipPath>
                 </defs>
               </svg>
-            </div>
+            </a>
           </div>
           <hr class="w-full border-t border-black" />
         </div>
-        <div class="grid grid-cols-3 gap-[30px]">
-          <div
-            class="flex flex-col gap-3.5"
-          >
-            <div class="h-[100px] object-cover w-full bg-gray-300 rounded-md">
-              <img />
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-[30px]">
+          {% for article in articles %}
             <div
-              class="flex flex-col gap-[7px]"
+              class="flex flex-col gap-3.5"
             >
-              <p
-                class="text-lg font-medium text-left text-[#202124]"
-              >
-                Max Verstappen iki cik. AAAAAAAAAAAA
-              </p>
+              <img {% if article.thumbnail %} src="{{ article.thumbnail }}" {% endif %} class="h-[200px] object-cover w-full bg-gray-300 rounded-md" />
               <div
-                class="flex justify-start items-center gap-[11px]"
+                class="flex flex-col gap-[7px]"
               >
-                <p class="text-xs text-left text-[#202124]">Formula 1</p>
-                <div class="w-3.5 h-px bg-[#202124]/50"></div>
-                <p class="text-xs text-left text-[#202124]">Sep 9, 2024</p>
+                <a
+                  href="{% url 'article:show_detail' article.id %}"
+                  class="text-lg font-medium text-left text-[#202124]"
+                >
+                  {{ article.title }}
+                </a>
+                <div
+                  class="flex justify-start items-center gap-[11px]"
+                >
+                  <p class="text-xs text-left text-[#202124]">{{ article.sports_type }}</p>
+                  <div class="w-3.5 h-px bg-[#202124]/50"></div>
+                  <p class="text-xs text-left text-[#202124]">{{ article.created_at|date:'d/m/Y' }}</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div
-            class="flex flex-col gap-3.5"
-          >
-            <div class="h-[100px] object-cover w-full bg-gray-300 rounded-md">
-              <img />
-            </div>
-            <div
-              class="flex flex-col gap-[7px]"
-            >
-              <p
-                class="text-lg font-medium text-left text-[#202124]"
-              >
-                MotoGP Australia 2025. Gak kenal siapa aja itu. Gak nonton MotoGP
-              </p>
-              <div
-                class="flex items-center gap-[11px]"
-              >
-                <p class="text-xs text-left text-[#202124]">MotoGP</p>
-                <div class="w-3.5 h-px bg-[#202124]/50"></div>
-                <p class="text-xs text-left text-[#202124]">Sep 9, 2024</p>
-              </div>
-            </div>
-          </div>
-          <div
-            class="flex flex-col gap-3.5"
-          >
-            <div class="h-[100px] object-cover w-full bg-gray-300 rounded-md">
-              <img />
-            </div>
-            <div
-              class="flex flex-col gap-[7px]"
-            >
-              <p
-                class="text-lg font-medium text-left text-[#202124]"
-              >
-                Tailoring treatments to individual genetic profiles
-              </p>
-              <div
-                class="flex items-center gap-[11px]"
-              >
-                <p class="text-xs text-left text-[#202124]">Health</p>
-                <div class="w-3.5 h-px bg-[#202124]/50"></div>
-                <p class="text-xs text-left text-[#202124]">Sep 9, 2024</p>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
-      <div
-        class="flex flex-col gap-[30px]"
-      >
+      <div class="flex flex-col gap-[30px]">
         <div
           class="flex flex-col gap-[11px]"
         >
@@ -143,9 +94,9 @@
             <p
               class="text-2xl font-medium text-left uppercase text-[#202124]"
             >
-              Produk Populer
+              Produk Featured
             </p>
-            <div class="flex justify-start items-end gap-[5px]">
+            <a href="{% url 'product:show_products_list' %}" class="flex justify-start items-end gap-[5px]">
               <p class="text-sm text-left text-[#202124]">View All</p>
               <svg
                 width="20"
@@ -181,430 +132,35 @@
                   </clipPath>
                 </defs>
               </svg>
-            </div>
+            </a>
           </div>
           <hr class="w-full border-t border-black" />
         </div>
-        <div class="grid grid-cols-4 gap-[30px]">
-          <div
-            class="flex flex-col gap-3.5 border border-black"
-          >
-            <div class="h-[100px] object-cover w-full bg-gray-300 rounded-md">
-              <img />
-            </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-[30px]">
+          {% for product in products %}
             <div
-              class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[254px] relative gap-[7px] pl-2.5"
+              class="flex flex-col gap-3.5 border border-black"
             >
-              <p
-                class="self-stretch flex-grow-0 flex-shrink-0 w-[244px] text-lg font-medium text-left text-[#202124]"
-              >
-                Sepatu A
-              </p>
+              <img src="{{ product.thumbnail }}" class="h-[200px] object-cover w-full bg-gray-300 rounded-md" />
               <div
-                class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[11px]"
+                class="flex flex-col justify-start items-start flex-grow-0 flex-shrink-0 w-[254px] relative gap-[7px] px-2 py-3"
               >
-                <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">
-                  Rp 100.000,00
-                </p>
-              </div>
-              <div
-                class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[5px] py-0.5"
-              >
+                <a
+                  href="{% url 'product:show_product_detail' product.id %}"
+                  class="self-stretch flex-grow-0 flex-shrink-0 w-[244px] text-lg font-medium text-left text-[#202124]"
+                >
+                  {{ product.name }}
+                </a>
                 <div
-                  class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-0.5"
+                  class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[11px]"
                 >
-                  <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">4.9</p>
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="flex-grow-0 flex-shrink-0 w-3 h-3 relative"
-                    preserveAspectRatio="xMidYMid meet"
-                  >
-                    <path
-                      d="M5.07188 3.31377C5.46519 2.33327 5.66184 1.84302 6 1.84302C6.33816 1.84302 6.53482 2.33327 6.92812 3.31377L6.94643 3.35942C7.16863 3.91336 7.27973 4.19033 7.50615 4.35867C7.73258 4.52701 8.0298 4.55363 8.62426 4.60687L8.73173 4.6165C9.70464 4.70363 10.1911 4.74719 10.2952 5.05669C10.3993 5.36618 10.038 5.69485 9.31549 6.35219L9.07435 6.57158C8.70859 6.90434 8.52572 7.07072 8.44048 7.28878C8.42458 7.32946 8.41136 7.37114 8.40091 7.41354C8.34488 7.64087 8.39844 7.88224 8.50554 8.36497L8.53888 8.51523C8.73572 9.4024 8.83413 9.84598 8.66229 10.0373C8.59808 10.1088 8.51463 10.1603 8.42192 10.1856C8.17382 10.2533 7.82158 9.96626 7.1171 9.39221C6.65452 9.01527 6.42322 8.8268 6.15767 8.7844C6.05322 8.76772 5.94678 8.76772 5.84233 8.7844C5.57678 8.8268 5.34548 9.01527 4.8829 9.39221C4.17842 9.96626 3.82618 10.2533 3.57808 10.1856C3.48537 10.1603 3.40192 10.1088 3.33771 10.0373C3.16587 9.84598 3.26429 9.4024 3.46112 8.51523L3.49446 8.36497C3.60157 7.88224 3.65512 7.64087 3.59909 7.41354C3.58864 7.37114 3.57542 7.32946 3.55952 7.28878C3.47428 7.07072 3.29141 6.90434 2.92565 6.57158L2.68451 6.35219C1.96199 5.69485 1.60073 5.36618 1.70482 5.05669C1.80891 4.74719 2.29536 4.70363 3.26827 4.6165L3.37574 4.60687C3.9702 4.55363 4.26743 4.52701 4.49385 4.35867C4.72028 4.19033 4.83137 3.91336 5.05357 3.35942L5.07188 3.31377Z"
-                      stroke="#222222"
-                    ></path>
-                  </svg>
+                  <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">
+                    Rp {{ product.price|intcomma }}
+                  </p>
                 </div>
-                <div class="flex-grow-0 flex-shrink-0 w-2.5 h-px bg-black"></div>
-                <p class="flex-grow-0 flex-shrink-0 text-xs text-left text-[#202124]">50 Terjual</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="flex w-96 flex-col items-center gap-[11px]"
-    >
-      <div class="w-full flex justify-between items-center">
-        <p class="text-2xl font-medium uppercase text-[#202124]">
-          Post Terbaru
-        </p>
-        <div class="flex justify-start items-end flex-grow-0 flex-shrink-0 relative gap-[5px]">
-          <p class="flex-grow-0 flex-shrink-0 text-sm text-left text-[#202124]">View All</p>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="flex-grow-0 flex-shrink-0 w-5 h-5 relative"
-            preserveAspectRatio="none"
-          >
-            <g clip-path="url(#clip0_29_161)">
-              <g clip-path="url(#clip1_29_161)">
-                <g clip-path="url(#clip2_29_161)">
-                  <path
-                    d="M6 10H14M14 10L10.5 6.5M14 10L10.5 13.5"
-                    stroke="#202124"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                </g>
-              </g>
-            </g>
-            <circle cx="10" cy="10" r="9.5" stroke="#202124"></circle>
-            <defs>
-              <clipPath id="clip0_29_161">
-                <rect width="10" height="8" fill="white" transform="translate(5 6)"></rect>
-              </clipPath>
-              <clipPath id="clip1_29_161">
-                <rect width="10" height="8" fill="white" transform="translate(5 6)"></rect>
-              </clipPath>
-              <clipPath id="clip2_29_161">
-                <rect width="10" height="8" fill="white" transform="translate(5 6)"></rect>
-              </clipPath>
-            </defs>
-          </svg>
-        </div>
-      </div>
-      <hr class="w-full border-t border-black" />
-      <div
-        class="flex flex-col gap-2.5"
-      >
-        <div
-          class="flex gap-1.5 px-4 py-[13px] border border-black"
-        >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="flex-grow-0 flex-shrink-0 w-9 h-9 relative"
-            preserveAspectRatio="none"
-          >
-            <circle cx="18" cy="15" r="4.5" stroke="#222222" stroke-linecap="round"></circle>
-            <circle cx="18" cy="18" r="13.5" stroke="#222222"></circle>
-            <path
-              d="M27 28.0589C26.4691 26.4641 25.2994 25.0549 23.6721 24.0499C22.0449 23.0448 20.0511 22.5 18 22.5C15.9489 22.5 13.9551 23.0448 12.3279 24.0498C10.7006 25.0549 9.53086 26.4641 9 28.0589"
-              stroke="#222222"
-              stroke-linecap="round"
-            ></path>
-          </svg>
-          <div
-            class="flex flex-col gap-1"
-          >
-            <div class="flex justify-start items-center relative gap-[5px]">
-              <p
-                class="h-5 text-base font-medium text-left text-black"
-              >
-                Seorang Fan
-              </p>
-              <p
-                class="text-xs font-extralight text-[#858585]"
-              >
-                @user123
-              </p>
-            </div>
-            <div
-              class="flex flex-col gap-3"
-            >
-              <div
-                class="flex flex-col justify-center items-center gap-2.5"
-              >
-                <p class="text-sm text-left text-black">
-                  Eh, lu pada tau gak? Tadi gw liat Max Verstappen lagi mangan di Ngawi? AAAAAA Lop
-                  you Maxxx &#x3C;3
-                </p>
-              </div>
-              <div
-                class="flex justify-start items-center gap-[5px]"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M4 12C4 7.58172 7.58172 4 12 4V4C16.4183 4 20 7.58172 20 12V17.0909C20 17.9375 20 18.3608 19.8739 18.6989C19.6712 19.2425 19.2425 19.6712 18.6989 19.8739C18.3608 20 17.9375 20 17.0909 20H12C7.58172 20 4 16.4183 4 12V12Z"
-                    stroke="#222222"
-                  ></path>
-                  <path
-                    d="M9 11L15 11"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path
-                    d="M12 15H15"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                </svg>
-                <p class="flex-grow-0 flex-shrink-0 text-sm text-left text-black">90</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex gap-1.5 px-4 py-[13px] border border-black"
-        >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="flex-grow-0 flex-shrink-0 w-9 h-9 relative"
-            preserveAspectRatio="none"
-          >
-            <circle cx="18" cy="15" r="4.5" stroke="#222222" stroke-linecap="round"></circle>
-            <circle cx="18" cy="18" r="13.5" stroke="#222222"></circle>
-            <path
-              d="M27 28.0589C26.4691 26.4641 25.2994 25.0549 23.6721 24.0499C22.0449 23.0448 20.0511 22.5 18 22.5C15.9489 22.5 13.9551 23.0448 12.3279 24.0498C10.7006 25.0549 9.53086 26.4641 9 28.0589"
-              stroke="#222222"
-              stroke-linecap="round"
-            ></path>
-          </svg>
-          <div
-            class="flex flex-col gap-1"
-          >
-            <div class="flex justify-start items-center gap-[5px]">
-              <p
-                class="h-5 text-base font-medium text-left text-black"
-              >
-                Seorang Fan
-              </p>
-              <p
-                class="text-xs font-extralight text-left text-[#858585]"
-              >
-                @user123
-              </p>
-            </div>
-            <div
-              class="flex flex-col gap-3"
-            >
-              <div
-                class="flex flex-col justify-center items-center gap-2.5"
-              >
-                <p class="text-sm text-left text-black">
-                  Yahahaha, Lando fumble di turn 1.
-                </p>
-              </div>
-              <div
-                class="flex justify-start items-center flex-grow-0 flex-shrink-0 relative gap-[5px]"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M4 12C4 7.58172 7.58172 4 12 4V4C16.4183 4 20 7.58172 20 12V17.0909C20 17.9375 20 18.3608 19.8739 18.6989C19.6712 19.2425 19.2425 19.6712 18.6989 19.8739C18.3608 20 17.9375 20 17.0909 20H12C7.58172 20 4 16.4183 4 12V12Z"
-                    stroke="#222222"
-                  ></path>
-                  <path
-                    d="M9 11L15 11"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path
-                    d="M12 15H15"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                </svg>
-                <p class="flex-grow-0 flex-shrink-0 text-sm text-left text-black">90</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex gap-1.5 px-4 py-[13px] border border-black"
-        >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="flex-grow-0 flex-shrink-0 w-9 h-9 relative"
-            preserveAspectRatio="none"
-          >
-            <circle cx="18" cy="15" r="4.5" stroke="#222222" stroke-linecap="round"></circle>
-            <circle cx="18" cy="18" r="13.5" stroke="#222222"></circle>
-            <path
-              d="M27 28.0589C26.4691 26.4641 25.2994 25.0549 23.6721 24.0499C22.0449 23.0448 20.0511 22.5 18 22.5C15.9489 22.5 13.9551 23.0448 12.3279 24.0498C10.7006 25.0549 9.53086 26.4641 9 28.0589"
-              stroke="#222222"
-              stroke-linecap="round"
-            ></path>
-          </svg>
-          <div
-            class="flex flex-col gap-1"
-          >
-            <div class="flex items-center gap-[5px]">
-              <p
-                class="h-5 text-base font-medium text-left text-black"
-              >
-                Seorang Fan
-              </p>
-              <p
-                class="text-xs font-extralight text-left text-[#858585]"
-              >
-                @user123
-              </p>
-            </div>
-            <div
-              class="flex flex-col gap-3"
-            >
-              <div
-                class="flex flex-col justify-center items-center self-stretch gap-2.5"
-              >
-                <p class="text-sm text-left text-black">
-                  LECLERC...... LECLERC LECLERC LECLEEEEEEEEEEEEEEEEEEEERC ❤ ❤ ❤ WANGY WANGY WANGY
-                  WANGY WANGY WANGY HU HA HU HA HU HA, aaaah baunya LECLERC wangi aku mau nyiumin
-                  aroma wanginya LECLERC AAAAAAAAH ~~ Rambutnya.... aaah rambutnya juga pengen aku
-                  elus-elus ~ AAAAAH LECLERC ❤ ❤ ❤ manis banget AAAAAAAAH
-                </p>
-              </div>
-              <div
-                class="flex items-center gap-[5px]"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M4 12C4 7.58172 7.58172 4 12 4V4C16.4183 4 20 7.58172 20 12V17.0909C20 17.9375 20 18.3608 19.8739 18.6989C19.6712 19.2425 19.2425 19.6712 18.6989 19.8739C18.3608 20 17.9375 20 17.0909 20H12C7.58172 20 4 16.4183 4 12V12Z"
-                    stroke="#222222"
-                  ></path>
-                  <path
-                    d="M9 11L15 11"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path
-                    d="M12 15H15"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                </svg>
-                <p class="flex-grow-0 flex-shrink-0 text-sm text-left text-black">90</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex gap-1.5 px-4 py-[13px] border border-black"
-        >
-          <svg
-            width="36"
-            height="36"
-            viewBox="0 0 36 36"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="flex-grow-0 flex-shrink-0 w-9 h-9 relative"
-            preserveAspectRatio="none"
-          >
-            <circle cx="18" cy="15" r="4.5" stroke="#222222" stroke-linecap="round"></circle>
-            <circle cx="18" cy="18" r="13.5" stroke="#222222"></circle>
-            <path
-              d="M27 28.0589C26.4691 26.4641 25.2994 25.0549 23.6721 24.0499C22.0449 23.0448 20.0511 22.5 18 22.5C15.9489 22.5 13.9551 23.0448 12.3279 24.0498C10.7006 25.0549 9.53086 26.4641 9 28.0589"
-              stroke="#222222"
-              stroke-linecap="round"
-            ></path>
-          </svg>
-          <div
-            class="flex flex-col justify-start items-start gap-1"
-          >
-            <div class="flex justify-start items-center relative gap-[5px]">
-              <p
-                class="w-[105px] h-5 text-base font-medium text-left text-black"
-              >
-                Seorang Fan
-              </p>
-              <p
-                class="w-[82px] h-[18px] text-xs font-extralight text-left text-[#858585]"
-              >
-                @user123
-              </p>
-            </div>
-            <div
-              class="flex flex-col gap-3"
-            >
-              <div
-                class="flex flex-col justify-center items-center gap-2.5"
-              >
-                <p class="text-sm text-left text-black">
-                  Ah ada crashtappen, bt gw jing. KALI KALI HAMILTON GITU LAAAAH.
-                </p>
-              </div>
-              <div
-                class="flex justify-start items-center gap-[5px]"
-              >
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="flex-grow-0 flex-shrink-0 w-6 h-6 relative"
-                  preserveAspectRatio="none"
-                >
-                  <path
-                    d="M4 12C4 7.58172 7.58172 4 12 4V4C16.4183 4 20 7.58172 20 12V17.0909C20 17.9375 20 18.3608 19.8739 18.6989C19.6712 19.2425 19.2425 19.6712 18.6989 19.8739C18.3608 20 17.9375 20 17.0909 20H12C7.58172 20 4 16.4183 4 12V12Z"
-                    stroke="#222222"
-                  ></path>
-                  <path
-                    d="M9 11L15 11"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                  <path
-                    d="M12 15H15"
-                    stroke="#222222"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  ></path>
-                </svg>
-                <p class="flex-grow-0 flex-shrink-0 text-sm text-left text-black">90</p>
-              </div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>

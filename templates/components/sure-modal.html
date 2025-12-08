@@ -1,0 +1,48 @@
+<div id="sureModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-gray-800 bg-opacity-50">
+    <div id="sureModalContent" class="bg-white rounded-lg shadow-lg w-5/6 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 max-h-screen overflow-y-auto">
+        <div class="flex flex-col items-center p-4 border-b">
+            <h3 id="sureModalHeading" class="text-xl font-semibold text-gray-900">
+                Apakah anda yakin?
+            </h3>
+            <p id="sureModalDesc" class="text-sm text-gray-600 mt-1">Deleted product cannot be recovered.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
+            <button class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors text-center" onclick="hideSureModal()">Batal</button>
+            <button id="sureBtn" class="flex-1 bg-red-600 text-white px-6 py-3 rounded-md font-medium hover:bg-red-700 transition-colors" onclick="action()">Delete</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sureModal = document.getElementById("sureModal");
+    const sureModalContent = document.getElementById("sureModalContent");
+    const sureModalDesc = document.getElementById("sureModalDesc");
+    const sureBtn = document.getElementById("sureBtn");
+
+    let action;
+
+    function showSureModal(subtext, btnText, actionFn) {
+        action = actionFn;
+        sureModalDesc.innerText = subtext;
+        sureBtn.innerText = btnText;
+
+        sureModal.classList.remove("hidden");
+        sureModal.classList.add("flex");
+
+        setTimeout(() => {
+            sureModalContent.classList.remove('opacity-0', 'scale-95');
+            sureModalContent.classList.add('opacity-100', 'scale-100');
+        }, 50);
+    }
+
+    function hideSureModal() {
+        sureModalContent.classList.remove('opacity-100', 'scale-100');
+        sureModalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            sureModal.classList.add('hidden');
+            sureModal.classList.remove('flex');
+        }, 150);
+    }
+</script>

@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Profil | SportZone</title>
+{% endblock meta %}
+
+{% load static %} {% block content %}
+
+<main class="container mx-auto p-4 mt-4">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+    <aside class="lg:col-span-1">
+      <div id="profile-sidebar-container" class="bg-white p-6 rounded-lg shadow-md sticky top-4 border border-gray-200 text-center">
+        <div class="animate-pulse">
+          <div class="w-32 h-32 rounded-full mx-auto mb-4 bg-gray-200"></div>
+          <div class="h-7 bg-gray-200 rounded w-3/4 mx-auto"></div>
+          <div class="flex justify-center gap-2 my-4">
+            <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+            <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+          </div>
+          <div class="text-left text-sm space-y-3 mt-6">
+            <div class="h-4 bg-gray-200 rounded w-full"></div>
+            <div class="h-4 bg-gray-200 rounded w-full"></div>
+          </div>
+          <div class="h-10 bg-gray-200 rounded-md mt-6"></div>
+        </div>
+        </div>
+    </aside>
+    <section class="lg:col-span-3">
+      <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
+        <nav id="profile-tab-nav-container" class="flex border-b border-gray-200">
+          <div class="animate-pulse flex w-full">
+            <div class="h-14 bg-gray-200 w-24 mx-6"></div>
+            <div class="h-14 bg-gray-200 w-24"></div>
+          </div>
+        </nav>
+        
+        <div id="tab-content" class="p-6">
+          <div class="text-center py-10 text-gray-500">
+            Memuat konten...
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+</main>
+
+
+<div id="profile-edit-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg">
+    <div class="flex justify-between items-center border-b p-4">
+      <h3 class="text-xl font-semibold">Edit Profile & Akun</h3>
+      <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+    </div>
+
+    <form id="profile-edit-form" class="p-6 space-y-4">
+      <div class="border-b pb-4">
+        <h4 class="text-md font-semibold text-gray-800 mb-3">Update Profile</h4>
+        <div>
+          <label for="form-profile-pic" class="block text-sm font-medium text-gray-700 mb-1">URL Foto Profil</label>
+          <input type="url" id="form-profile-pic" name="profile_pic" placeholder="https://..." class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        </div>
+        <div class="mt-4">
+          <label for="form-birth-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir</label>
+          <input type="date" id="form-birth-date" name="birth_date" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+        </div>
+      </div>
+
+      <div class="border-b pb-4">
+        <h4 class="text-md font-semibold text-gray-800 mb-3">Ubah Password (Isi jika ingin ganti)</h4>
+        <div>
+          <label for="form-new-password" class="block text-sm font-medium text-gray-700 mb-1">Password Baru</A>
+          <input type="password" id="form-new-password" name="new_password" class="w-full px-3 py-2 border border-gray-300 rounded-md" autocomplete="new-password">
+        </div>
+        <div class="mt-4">
+          <label for="form-confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password Baru</label>
+          <input type="password" id="form-confirm-password" name="confirm_password" class="w-full px-3 py-2 border border-gray-300 rounded-md" autocomplete="new-password">
+        </div>
+      </div>
+      
+      <div id="profile-form-message" class="text-sm hidden"></div>
+
+      <div class="flex justify-end space-x-3 pt-4">
+        <button type="button" id="modal-cancel-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-medium hover:bg-gray-300">
+          Batal
+        </button>
+        <button type="submit" id="form-submit-btn" class="bg-black text-white px-4 py-2 rounded-md font-medium hover:bg-gray-800">
+          Simpan Perubahan
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sidebarContainer = document.getElementById('profile-sidebar-container');
+  const tabNavContainer = document.getElementById('profile-tab-nav-container');
+  const tabContent = document.getElementById('tab-content');
+  const mainContainer = document.querySelector('main');
+
+  const profileEditModal = document.getElementById('profile-edit-modal');
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  const modalCancelBtn = document.getElementById('modal-cancel-btn');
+  const profileEditForm = document.getElementById('profile-edit-form');
+  const formSubmitBtn = document.getElementById('form-submit-btn');
+  const formMessage = document.getElementById('profile-form-message');
+
+  const profileUsername = "{{ profile_user_username }}";
+
+  let currentProfileData = null;
+
+  const formatter = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  });
+
+  async function fetchProfileData(username) {
+    sidebarContainer.innerHTML = document.getElementById('profile-sidebar-container').innerHTML;
+    tabNavContainer.innerHTML = document.getElementById('profile-tab-nav-container').innerHTML;
+    tabContent.innerHTML = `<div class="text-center py-10 text-gray-500">Memuat konten...</div>`;
+
+    const BASE_URL = "{% url 'userprofile:api-profile-detail' 'PLACEHOLDER-USERNAME' %}"
+    const API_ENDPOINT = BASE_URL.replace("PLACEHOLDER-USERNAME", username);
+
+    try {
+      const response = await fetch(API_ENDPOINT);
+      if (!response.ok) throw new Error('Gagal memuat data profil');
+      
+      const data = await response.json();
+      currentProfileData = data;
+
+      document.querySelector("title").innerText = `${data.username} | SportZone`;
+
+      renderProfileSidebar(data);
+      renderProfileTabs(data);
+      
+      fetchTabContent('tentang', data.id);
+    } catch (error) {
+      console.error("Gagal fetch profil:", error);
+      sidebarContainer.innerHTML = `<div class="p-6 text-red-500">Gagal memuat profil.</div>`;
+      tabNavContainer.innerHTML = '';
+      tabContent.innerHTML = '';
+    }
+  }
+
+  function renderProfileSidebar(data) {
+    const defaultPic = 'https://placehold.co/150x150/E2E8F0/A0AEC0?text=No+Image';
+    const profilePic = data.profile_pic || defaultPic;
+
+    let badgesHTML = '';
+    if (data.is_admin) {
+      badgesHTML += `<span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">Admin</span>`;
+    }
+    if (data.is_seller) {
+      badgesHTML += `<span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Seller</span>`;
+    }
+    if (data.is_author) {
+      badgesHTML += `<span class="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">Author</span>`;
+    }
+
+    let editButtonHTML = '';
+    if (data.is_self) {
+      editButtonHTML = `
+        <button id="edit-profile-btn" class="w-full bg-black text-white p-2 rounded-md font-semibold hover:bg-gray-800 mt-6 transition">
+          Edit Profile & Akun
+        </button>`;
+
+      document.getElementById('form-profile-pic').value = data.profile_pic || '';
+      document.getElementById('form-birth-date').value = data.birth_date_iso || '';
+    }
+
+    const sidebarHTML = `
+      <img 
+        id="profile-pic-display"
+        src="${profilePic}" 
+        alt="${data.username}" 
+        class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-gray-100"
+      >
+      <h2 class="text-2xl font-bold text-gray-900">${data.username}</h2>
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${badgesHTML}
+      </div>
+      <div class="text-left text-sm text-gray-600 space-y-2 mt-6">
+        <p>
+          <strong class="font-medium text-gray-900">Bergabung:</strong> 
+          ${data.date_joined_display}
+        </p>
+        <p id="birth-date-display">
+          <strong class="font-medium text-gray-900">Tanggal Lahir:</strong> 
+          ${data.birth_date_display}
+        </p>
+      </div>
+      ${editButtonHTML}
+    `;
+    sidebarContainer.innerHTML = sidebarHTML;
+  }
+
+  function renderProfileTabs(data) {
+    let tabsHTML = `
+      <a href="#" data-tab="tentang" data-user-id="${data.id}" class="tab-link active-tab px-6 py-4 font-medium text-sm border-b-2 border-black text-black">
+        Tentang
+      </a>`;
+    
+    if (data.is_seller) {
+      tabsHTML += `
+        <a href="#" data-tab="produk" data-user-id="${data.id}" class="tab-link inactive-tab px-6 py-4 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+          Produk
+        </a>`;
+    }
+    if (data.is_author) {
+      tabsHTML += `
+        <a href="#" data-tab="artikel" data-user-id="${data.id}" class="tab-link inactive-tab px-6 py-4 font-medium text-sm border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700">
+          Artikel
+        </a>`;
+    }
+    tabNavContainer.innerHTML = tabsHTML;
+  }
+
+  async function fetchTabContent(tabName, userId) {
+    tabContent.innerHTML = `<div class="text-center py-10 text-gray-500">Memuat ${tabName}...</div>`;
+    
+    const BASE_URL = "{% url 'userprofile:api-profile-content' 1234 %}"
+    const API_ENDPOINT = `${BASE_URL.replace("1234", userId)}?tab=${tabName}`;
+    try {
+      const response = await fetch(API_ENDPOINT);
+      if (!response.ok) throw new Error('Gagal memuat data');
+      const data = await response.json();
+      if (data.tab === 'produk') renderProducts(data.data);
+      else if (data.tab === 'artikel') renderArticles(data.data);
+      else renderAbout(data.data);
+    } catch (error) {
+      console.error("Gagal fetch konten tab:", error);
+      tabContent.innerHTML = `<div class="text-center py-10 text-red-500">Gagal memuat konten.</div>`;
+    }
+  }
+  function renderProducts(products) {
+    if (products.length === 0) { /*...*/ }
+    let productGrid = '<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">';
+    products.forEach(product => {
+      productGrid += `
+        <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <img src="${product.thumbnail || '...'}" alt="${product.name}" class="w-full h-48 object-contain mb-4 rounded">
+          <a href="${"{% url 'product:show_product_detail' 1234 %}".replace("1234", product.id)}" class="font-semibold text-gray-800 truncate">${product.name}</a>
+          <p class="text-lg font-bold text-black mt-1">${formatter.format(product.price)}</p>
+        </div>`;
+    });
+    tabContent.innerHTML = productGrid + '</div>';
+  }
+  function renderArticles(articles) {
+    if (articles.length === 0) {
+      tabContent.innerHTML = `<p class="text-gray-500 text-center py-6">User ini belum menulis artikel.</p>`;
+      return;
+    }
+
+    let articleList = '<div class="space-y-4">';
+    
+    articles.forEach(article => {
+      articleList += `
+        <div class="bg-white p-4 rounded-lg shadow-md border border-gray-200">
+          <a href="${"{% url 'article:show_detail' 1234 %}".replace("1234", article.id)}" class="text-xl font-bold text-gray-900">${article.title}</a>
+          <p class="text-sm text-gray-500 mb-2">Dipublikasi pada: ${new Date(article.created_at).toLocaleDateString('id-ID', { dateStyle: 'long' })}</p>
+          <p class="text-gray-700">${article.snippet}...</p>
+        </div>
+      `;
+    });
+
+    articleList += '</div>';
+    tabContent.innerHTML = articleList;
+  }
+  function renderAbout(aboutData) {
+    tabContent.innerHTML = `<p class="text-gray-700 leading-relaxed">${aboutData}</p>`;
+  }
+
+  function showModal() {
+    formMessage.classList.add('hidden');
+    formMessage.textContent = '';
+
+    profileEditModal.classList.remove('hidden');
+  }
+  function hideModal() {
+    profileEditModal.classList.add('hidden');
+  }
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    const newPassword = document.getElementById('form-new-password').value;
+    const confirmPassword = document.getElementById('form-confirm-password').value;
+    if (newPassword && newPassword !== confirmPassword) {
+      formMessage.textContent = 'Error: Password baru dan konfirmasi tidak cocok!';
+      formMessage.className = 'text-sm text-red-600';
+      formMessage.classList.remove('hidden');
+      return;
+    }
+    formSubmitBtn.disabled = true;
+    formSubmitBtn.textContent = 'Menyimpan...';
+    const formData = new FormData(profileEditForm);
+    
+    try {
+      const response = await fetch("{% url 'userprofile:api-profile-update' %}", {
+        method: 'POST',
+        body: formData
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Gagal menyimpan.');
+
+      formMessage.textContent = 'Perubahan berhasil disimpan!';
+      formMessage.className = 'text-sm text-green-600';
+      formMessage.classList.remove('hidden');
+
+      document.getElementById('form-new-password').value = '';
+      document.getElementById('form-confirm-password').value = '';
+
+      setTimeout(hideModal, 1000);
+
+      fetchProfileData(profileUsername);
+
+    } catch (error) {
+      formMessage.textContent = `Error: ${error.message}`;
+      formMessage.className = 'text-sm text-red-600';
+      formMessage.classList.remove('hidden');
+    } finally {
+      formSubmitBtn.disabled = false;
+      formSubmitBtn.textContent = 'Simpan Perubahan';
+    }
+  }
+
+  tabNavContainer.addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetLink = e.target.closest('.tab-link');
+    if (targetLink && !targetLink.classList.contains('active-tab')) {
+
+      tabNavContainer.querySelectorAll('.tab-link').forEach(link => {
+        link.classList.remove('active-tab', 'border-black', 'text-black');
+        link.classList.add('inactive-tab', 'border-transparent', 'text-gray-500');
+      });
+
+      targetLink.classList.add('active-tab', 'border-black', 'text-black');
+      targetLink.classList.remove('inactive-tab', 'border-transparent', 'text-gray-500');
+
+      fetchTabContent(targetLink.dataset.tab, targetLink.dataset.userId);
+    }
+  });
+
+  mainContainer.addEventListener('click', (e) => {
+    if (e.target.id === 'edit-profile-btn') {
+      e.preventDefault();
+      showModal();
+    }
+  });
+
+  profileEditForm.addEventListener('submit', handleFormSubmit);
+  modalCloseBtn.addEventListener('click', hideModal);
+  modalCancelBtn.addEventListener('click', hideModal);
+
+  fetchProfileData(profileUsername);
+
+});
+</script>
+<style>
+  .tab-link.active-tab { border-color: #000; color: #000; }
+  .tab-link.inactive-tab { border-color: transparent; }
+</style>
+{% endblock content %}

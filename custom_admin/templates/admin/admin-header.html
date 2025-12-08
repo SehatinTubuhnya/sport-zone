@@ -1,0 +1,26 @@
+<div class="w-full flex flex-col items-center">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+  <div id="adminNavLinks" class="flex w-full"></div>
+
+  <script>
+    const links = [
+      { text: "Summary", url: "{% url 'custom_admin:homepage' %}" },
+      { text: "Action Logs", url: "{% url 'custom_admin:manage_action_logs' %}" },
+      { text: "Manage Accounts", url: "{% url 'custom_admin:manage_accounts' %}" }
+    ];
+
+    const currentPath = window.location.pathname;
+
+    for (const link of links) {
+      const button = document.createElement("a");
+      button.href = link.url;
+      button.className = currentPath === link.url ? "w-full bg-black text-white text-center py-2" : "w-full border-b-2 border-black text-center py-2";
+
+      const p = document.createElement("p");
+      p.textContent = link.text;
+      
+      button.appendChild(p);
+      document.getElementById("adminNavLinks").appendChild(button);
+    }
+  </script>
+</div>

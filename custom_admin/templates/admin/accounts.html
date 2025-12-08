@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block meta %}
+<title>Accounts | Admin | SportZone</title>
+{% endblock meta %}
+
+{% block content %}
+<div class="w-full flex justify-center">
+  <div class="container flex flex-col items-center p-4 mt-4">
+    {% include 'admin/admin-header.html' %}
+    <div class="bg-white rounded-lg shadow-md p-6 m-4 flex flex-col items-center gap-5 w-full border border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Accounts</h2>
+      <div class="w-full flex justify-between">
+        <div class="flex items-center gap-2">
+            <p>Per page: </p>
+            <select id="per-page-select" class="border border-black rounded-sm">
+                <option selected value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-2">
+            <p>Query:</p>
+            <input type="text" id="query" class="border border-black focus:outline-none" />
+            <button id="query-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="6" stroke="#222222"/>
+                    <path d="M20 20L17 17" stroke="#222222" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+      </div>
+      <table class="w-full table-auto">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Prof. Pic.</th>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Username</th>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Roles</th>
+            <th class="px-4 py-2 border-b border-gray-300 text-left text-sm font-medium text-gray-700">Int.</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          
+        </tbody>
+      </table>
+      <div id="page-btns" class="w-full flex justify-center pt-3 gap-2">
+        <button class="px-3 py-2 bg-slate-200 rounded-md">
+            1
+        </button>
+        <button class="px-3 py-2 bg-black text-white rounded-md">
+            2
+        </button>
+        <button class="px-3 py-2 bg-slate-200 rounded-md">
+            3
+        </button>
+      </div>
+    </div>
+
+    <div id="accountModal" class="hidden fixed inset-0 z-50 w-full items-center justify-center bg-gray-800 bg-opacity-50">
+        <div id="accountModalContent" class="bg-white rounded-lg shadow-lg w-5/6 sm:w-3/5 md:w-1/2 lg:w-2/5 xl:w-1/3 max-h-screen overflow-y-auto">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 border-b">
+            <div>
+                <h3 id="accountModalHeading" class="text-xl font-semibold text-gray-900">
+                    Edit Akun
+                </h3>
+            </div>
+            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="hideAccountModal()">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="px-6 py-4 space-y-6 form-style">
+            <form id="accountForm">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Masukkan username" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password Baru</label>
+                    <input type="password" id="password" name="password" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Kosongkan jika tidak ingin mengganti password">
+                </div>
+                <div class="mb-4">
+                    <label for="profile_pic" class="block text-sm font-medium text-gray-700">Foto Profil</label>
+                    <input type="url" id="profile_pic" name="profile_pic" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://example.com/image.jpg">
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center">
+                        <input id="is_admin" name="is_admin" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                        <label for="is_admin" class="ml-2 text-sm font-medium text-gray-900">Staff</label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center">
+                        <input id="is_author" name="is_author" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                        <label for="is_author" class="ml-2 text-sm font-medium text-gray-900">Author</label>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center">
+                        <input id="is_seller" name="is_seller" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded">
+                        <label for="is_seller" class="ml-2 text-sm font-medium text-gray-900">Seller</label>
+                    </div>
+                </div>
+            </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex flex-col sm:flex-row gap-4 p-6 border-t border-gray-200 rounded-b">
+                <button type="button" id="cancelButton" class="order-2 sm:order-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors text-center" onclick="hideAccountModal()">Batal</button>
+                <button type="submit" id="submitAccount" form="accountForm" class="order-1 sm:order-2 flex-1 border border-black bg-black text-white hover:bg-white hover:text-black px-6 py-3 rounded-md font-medium transition-colors">Edit Akun</button>
+            </div>
+        </div>
+    </div>
+  </div>
+  <script>
+    const ACCOUNTS_ENDPOINT = "{% url 'custom_admin:get_accounts' %}";
+    const EDIT_ACCOUNT_ENDPOINT = "{% url 'custom_admin:edit_account' %}";
+    const DEL_ACCOUNT_ENDPOINT = "{% url 'custom_admin:delete_account' %}";
+
+    const perPageSelect = document.getElementById("per-page-select");
+    const queryInput = document.getElementById("query");
+    const queryBtn = document.getElementById("query-btn");
+    const tableBody = document.getElementById("tbody");
+    const pageBtns = document.getElementById("page-btns");
+
+    let perPage = 20;
+    let page = 1;
+    let query = "";
+
+    function setLoading() {
+        tableBody.innerHTML = `<tr class="loading">
+            <td colspan="4" class="text-center pt-2">
+              <div>
+                {% include 'components/loading-svg.html' %}
+              </div>
+            </td>
+        </tr>`;
+
+        pageBtns.innerHTML = `<div class="loading">{% include 'components/loading-svg.html' %}</div>`;
+    }
+
+    async function fetchAccounts() {
+        setLoading();
+
+        const data = await fetch(`${ACCOUNTS_ENDPOINT}?page=${page}&per_page=${perPage}&query=${query}`);
+
+        /** @type { { total_count: number; datas: { id: string; profile_pic: string; username: string; is_admin: boolean; is_seller: boolean; is_author: boolean; }[]; } } */
+        const result = await data.json();
+
+        tableBody.innerHTML = "";
+
+        if (result.datas.length) {
+            for (const data of result.datas) {
+                const roles = [];
+                if (data.is_admin) roles.push("Admin");
+                if (data.is_seller) roles.push("Seller");
+                if (data.is_author) roles.push("Author");
+
+                const row = document.createElement("tr");
+                row.innerHTML = `<td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">
+                    ${
+                        data.profile_pic
+                            ? `<img src="${data.profile_pic}" class="size-10 object-cover border border-black rounded-full" />`
+                            : `<svg
+                                    width="40"
+                                    height="40"
+                                    viewBox="0 0 40 40"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="flex-grow-0 flex-shrink-0 w-10 h-10 relative"
+                                    preserveAspectRatio="xMidYMid meet"
+                                >
+                                    <ellipse cx="20" cy="16.6667" rx="5" ry="5" stroke="#222222" stroke-linecap="round"></ellipse>
+                                    <circle cx="20" cy="20" r="15" stroke="#222222"></circle>
+                                    <path
+                                    d="M30 31.1765C29.4102 29.4046 28.1104 27.8388 26.3024 26.7221C24.4943 25.6053 22.279 25 20 25C17.721 25 15.5057 25.6053 13.6976 26.7221C11.8896 27.8388 10.5898 29.4046 10 31.1765"
+                                    stroke="#222222"
+                                    stroke-linecap="round"
+                                    ></path>
+                                </svg>`
+                    }
+                </td>
+                <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">
+                    ${data.username}
+                </td>
+                <td class="px-4 py-2 border-b border-gray-300 text-sm text-gray-900">
+                    ${roles.join(", ") || "No Roles"}
+                </td>`;
+
+                const editBtn = document.createElement("button");
+                editBtn.className = "px-3 py-2 border border-yellow-700";
+                editBtn.innerText = "Edit";
+
+                editBtn.addEventListener("click", () => {
+                    showAccountModal(data);
+                });
+
+                const delBtn = document.createElement("button");
+                delBtn.className = "ml-2 px-3 py-2 border border-red-700";
+                delBtn.innerText = "Hapus";
+
+                delBtn.addEventListener("click", () => {
+                    showSureModal("Akun yang sudah dihapus tidak bisa dipulihkan.", "Hapus", async () => {
+                        const formData = new FormData();
+                        formData.append("id", data.id);
+
+                        const resp = await fetch(DEL_ACCOUNT_ENDPOINT, {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        if (resp.ok) {
+                            showToast("Akun berhasil dihapus!", "", "success");
+                            hideSureModal();
+                            fetchAccounts();
+                        }
+                    });
+                });
+
+                const tableData = document.createElement("td");
+                tableData.className = "px-4 py-1 border-b border-gray-300 text-sm text-gray-900";
+                tableData.appendChild(editBtn);
+                tableData.appendChild(delBtn);
+
+                row.appendChild(tableData);
+                tableBody.appendChild(row);
+            }
+        } else {
+            const row = document.createElement("tr");
+            row.innerHTML = `<td colspan="4" class="text-center text-sm pt-2"><p>No data can be found.</p></td>`;
+            tableBody.appendChild(row);
+        }
+
+        pageBtns.innerHTML = "";
+
+        const maxPage = Math.ceil(result.total_count / perPage);
+
+        if (page > 1 && page <= maxPage) {
+            const leftBtn = document.createElement("button");
+            leftBtn.className = "px-3 py-2 bg-slate-200 rounded-md";
+            leftBtn.innerText = page - 1;
+            leftBtn.addEventListener("click", () => {
+                page--;
+                fetchLogs();
+            });
+            pageBtns.appendChild(leftBtn);
+        }
+
+        const midBtn = document.createElement("button");
+        midBtn.className = "px-3 py-2 bg-black text-white rounded-md";
+        midBtn.innerText = page;
+        pageBtns.appendChild(midBtn);
+
+        if (page+1 >= 1 && page+1 < maxPage) {
+            const rightBtn = document.createElement("button");
+            rightBtn.className = "px-3 py-2 bg-slate-200 rounded-md";
+            rightBtn.innerText = page+1;
+            rightBtn.addEventListener("click", () => {
+                page++;
+                fetchLogs();
+            });
+            pageBtns.appendChild(rightBtn);
+        }
+    }
+
+    fetchAccounts();
+
+    perPageSelect.addEventListener("change", e => {
+      if (perPage !== +e.target.value) {
+        perPage = +e.target.value;
+        fetchAccounts();
+      }
+    });
+
+    queryInput.addEventListener("keypress", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+
+        page = 1;
+        query = queryInput.value;
+        fetchAccounts();
+      }
+    });
+
+    queryBtn.addEventListener("click", e => {
+        e.preventDefault();
+
+        page = 1;
+        query = queryInput;
+        fetchAccounts();
+    });
+
+    const modal = document.getElementById("accountModal");
+    const modalContent = document.getElementById("accountModalContent");
+    const accountModalHeading = document.getElementById("accountModalHeading");
+    const accountModalDesc = document.getElementById("accountModalDesc");
+    const submitBtn = document.getElementById("submitAccount");
+
+    let accountId = null;
+
+    /** @type {HTMLFormElement} */
+    const accountForm = document.getElementById("accountForm");
+
+    /** @type {HTMLInputElement} */
+    const username = document.getElementById("username");
+
+    /** @type {HTMLInputElement} */
+    const password = document.getElementById("password");
+
+    /** @type {HTMLInputElement} */
+    const profilePic = document.getElementById("profile_pic");
+
+    /** @type {HTMLInputElement} */
+    const isAdmin = document.getElementById("is_admin");
+
+    /** @type {HTMLInputElement} */
+    const isAuthor = document.getElementById("is_author");
+
+    /** @type {HTMLInputElement} */
+    const isSeller = document.getElementById("is_seller");
+
+    function showAccountModal(data) {
+        accountForm.reset();
+
+        accountId = data.id;
+        username.value = data.username;
+        password.value = "";
+        profilePic.value = data.profile_pic;
+        isAdmin.checked = data.is_admin;
+        isAuthor.checked = data.is_author;
+        isSeller.checked = data.is_seller;
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            modalContent.classList.remove('opacity-0', 'scale-95');
+            modalContent.classList.add('opacity-100', 'scale-100');
+        }, 50); 
+    }
+
+    function hideAccountModal() {
+        modalContent.classList.remove('opacity-100', 'scale-100');
+        modalContent.classList.add('opacity-0', 'scale-95');
+
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 150);
+    }
+
+    async function editAccount() {
+        const formData = new FormData(accountForm);
+        formData.append("id", accountId);
+
+        const resp = await fetch(EDIT_ACCOUNT_ENDPOINT, {
+            method: "POST",
+            body: formData
+        });
+
+        accountForm.reset();
+        hideAccountModal();
+
+        if (resp.ok) {
+            showToast("Akun berhasil diedit!", "", "success");
+            fetchAccounts();
+        } else {
+            try {
+                const data = await resp.json();
+                showToast("Terdapat kesalahan!", data.message, "error");
+            } catch (err) {
+                showToast("Terdapat kesalahan!", `${err}`, "error");
+            }
+        }
+        return false;
+    }
+
+    accountForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        editAccount();
+    });
+  </script>
+</div>
+{% endblock %}
