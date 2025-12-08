@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     'account',
     'main',
     'authentication',
-    'corsheaders'
+    'corsheaders',
     'product',
     'custom_admin',
     'userprofile'
