@@ -16,6 +16,13 @@ import os
 
 load_dotenv()
 
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,7 +43,7 @@ ALLOWED_HOSTS = [
     "localhost", 
     "josh-christmas-sport-zone.pbp.cs.ui.ac.id",
     "andrew-wanarahardja-sport-zone.pbp.cs.ui.ac.id",
-    ]
+    "10.0.2.2"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://andrew-wanarahardja-sport-zone.pbp.cs.ui.ac.id",
@@ -62,6 +69,8 @@ INSTALLED_APPS = [
     'article',
     'account',
     'main',
+    'authentication',
+    'corsheaders',
     'product',
     'custom_admin',
     'userprofile',
