@@ -10,3 +10,5 @@ def home(request):
         "articles": recent_articles,
         "products": featured_products
     })
+
+

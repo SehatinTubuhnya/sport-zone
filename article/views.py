@@ -12,6 +12,9 @@ from django.http import JsonResponse
 from account.models import CustomUser
 from custom_admin.models import ActionLog
 
+import requests
+import json
+
 # Create your views here.
 # def edit_products(request, id):
 #     products = get_object_or_404(News, pk=id)
@@ -137,7 +140,7 @@ def edit_news_entry_ajax(request, news_id):
         return JsonResponse({'success': True})
         
     except News.DoesNotExist:
-        return JsonResponse({'error': 'Product not found'}, status=404)
+        return JsonResponse({'error': 'News not found'}, status=404)
     
 @csrf_exempt
 @require_GET
@@ -183,6 +186,8 @@ def add_comment_entry_ajax(request, news_id):
     user = request.user
     username = user.username
     profile_pic = user.profile_pic
+    if (profile_pic == None):
+        profile_pic = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4YreOWfDX3kK-QLAbAL4ufCPc84ol2MA8Xg&s'
     news = News.objects.get(pk=news_id)
 
     new_comment = Comment(
@@ -198,3 +203,74 @@ def add_comment_entry_ajax(request, news_id):
     log.save()
 
     return HttpResponse(b"CREATED", status=201)
+
+def proxy_image(request):
+    image_url = request.GET.get('url')
+    if not image_url:
+        return HttpResponse('No URL provided', status=400)
+    
+    try:
+        # Fetch image from external source
+        response = requests.get(image_url, timeout=10)
+        response.raise_for_status()
+        
+        # Return the image with proper content type
+        return HttpResponse(
+            response.content,
+            content_type=response.headers.get('Content-Type', 'image/jpeg')
+        )
+    except requests.RequestException as e:
+        return HttpResponse(f'Error fetching image: {str(e)}', status=500)
+    
+@csrf_exempt
+def create_news_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        title = strip_tags(data.get("title", ""))  # Strip HTML tags
+        content = strip_tags(data.get("content", ""))  # Strip HTML tags
+        category = data.get("category", "")
+        thumbnail = data.get("thumbnail", "")
+        is_featured = data.get("is_featured", False)
+        user = request.user
+        
+        new_news = News(
+            title=title, 
+            content=content,
+            category=category,
+            thumbnail=thumbnail,
+            is_featured=is_featured,
+            user=user
+        )
+        new_news.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
+    
+@csrf_exempt
+def create_comment_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        content = strip_tags(data.get("content"))
+        user = request.user
+        news = News.objects.get(pk=data.get("news_id"))
+
+        if str(user) != 'AnonymousUser':
+            username = request.user.username
+            profile_pic = request.user.profile_pic
+        else:
+            username = 'AnonymousUser'
+            profile_pic = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4YreOWfDX3kK-QLAbAL4ufCPc84ol2MA8Xg&s'
+
+        new_comment = Comment(
+            content = content,
+            user = user,
+            username = username,
+            profile_pic = profile_pic,
+            news = news
+        )
+        new_comment.save()
+        
+        return JsonResponse({"status": "success"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
