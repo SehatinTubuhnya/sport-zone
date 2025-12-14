@@ -9,6 +9,8 @@ from article.views import get_user_by_id, add_comment_entry_ajax
 from article.views import show_comment_json_by_news_id
 
 from article.views import proxy_image, create_news_flutter, create_comment_flutter
+from article.views import edit_news_flutter, delete_news_flutter
+from article.views import get_user
 
 app_name = 'article'
 
@@ -31,4 +33,8 @@ urlpatterns = [
     path('proxy-image/', proxy_image, name='proxy_image'),
     path('create-news-flutter/', create_news_flutter, name='create-news-flutter'),
     path('create-comment-flutter/', create_comment_flutter, name='create-comment-flutter'),
+
+    path('edit-news-flutter/', edit_news_flutter, name='edit-news-flutter'),
+    path('delete-news-flutter/', delete_news_flutter, name='delete-news-flutter'),
+    path('get-user/', get_user, name='get-user'),
 ]

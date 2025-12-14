@@ -74,7 +74,6 @@ INSTALLED_APPS = [
     'product',
     'custom_admin',
     'userprofile',
-    'corsheaders',
 ]
 
 AUTH_USER_MODEL = 'account.CustomUser'

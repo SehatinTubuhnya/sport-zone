@@ -229,7 +229,7 @@ def create_news_flutter(request):
         title = strip_tags(data.get("title", ""))  # Strip HTML tags
         content = strip_tags(data.get("content", ""))  # Strip HTML tags
         category = data.get("category", "")
-        thumbnail = data.get("thumbnail", "")
+        thumbnail = strip_tags(data.get("thumbnail", ""))
         is_featured = data.get("is_featured", False)
         user = request.user
         
@@ -239,7 +239,8 @@ def create_news_flutter(request):
             category=category,
             thumbnail=thumbnail,
             is_featured=is_featured,
-            user=user
+            user=user,
+            username=user.username,
         )
         new_news.save()
         
@@ -274,3 +275,55 @@ def create_comment_flutter(request):
         return JsonResponse({"status": "success"}, status=200)
     else:
         return JsonResponse({"status": "error"}, status=401)
+    
+@csrf_exempt
+@require_POST
+def edit_news_flutter(request):
+    try:
+        data = json.loads(request.body)
+        news = News.objects.get(pk=data.get("news_id"))
+        news.title = strip_tags(data.get("title", news.title))
+        news.content = strip_tags(data.get("content", news.content))
+        news.category = data.get("category", news.category)
+        news.sports_type = strip_tags(data.get("sports_type", news.sports_type))
+        news.thumbnail = strip_tags(data.get("thumbnail", news.thumbnail))
+        news.is_featured = data.get("is_featured", news.is_featured)
+
+        news.save()
+
+        log = ActionLog.objects.create(actor=request.user.username, action=f"Mengedit artikel dengan judul '{news.title}'")
+        log.save()
+
+        return JsonResponse({'status': 'success'})
+        
+    except News.DoesNotExist:
+        return JsonResponse({'status': 'News not found'}, status=404)
+    
+@require_POST
+@csrf_exempt
+def delete_news_flutter(request):
+    try:
+        data = json.loads(request.body)
+        news_id = data.get("news_id")
+        news = News.objects.get(id=news_id, user=request.user)
+        news.delete()
+
+        log = ActionLog.objects.create(actor=request.user.username, action=f"Menghapus artikel dengan judul '{news.title}'")
+        log.save()
+
+        return JsonResponse({'status': 'success'})
+    except News.DoesNotExist:
+        return JsonResponse({'status': 'Product not found'}, status=404)
+    
+def get_user(request):
+    user = request.user
+    if str(user) == 'AnonymousUser':
+        return JsonResponse({'status': 'error'})
+    else:
+        print('user is admin  : ' + str(user.is_admin))
+        print('user is author : ' + str(user.is_author))
+        return JsonResponse({
+            'status': 'success', 
+            'username':user.username,
+            'auth': (user.is_admin or user.is_author)
+        }, status=200)
