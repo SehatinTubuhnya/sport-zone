@@ -320,10 +320,9 @@ def get_user(request):
     if str(user) == 'AnonymousUser':
         return JsonResponse({'status': 'error'})
     else:
-        print('user is admin  : ' + str(user.is_admin))
-        print('user is author : ' + str(user.is_author))
         return JsonResponse({
             'status': 'success', 
-            'username':user.username,
+            'username': user.username,
+            'profilePic': user.profile_pic,
             'auth': (user.is_admin or user.is_author)
         }, status=200)
