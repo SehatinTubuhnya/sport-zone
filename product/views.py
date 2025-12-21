@@ -1,294 +1,226 @@
 import json
-
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import Paginator
 from django.db.models import Q
-from django.db.models.query import Q
 from django.http import (
-    HttpResponse,
+    JsonResponse,
     HttpResponseBadRequest,
     HttpResponseForbidden,
-    HttpResponseRedirect,
-    JsonResponse,
 )
-
-# Create your views here.
-from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
-from account.models import CustomUser
 from custom_admin.models import ActionLog
-
-from .forms import ProductForm
 from .models import Product
 
 
-def delete_products(request, id):
-    products = get_object_or_404(Product, pk=id)
-    products.delete()
-    return HttpResponseRedirect(reverse("main:show_main"))
-
-
-def edit_products(request, id):
-    products = get_object_or_404(Product, pk=id)
-    form = ProductForm(request.POST or None, instance=products)
-    if form.is_valid() and request.method == "POST":
-        form.save()
-        return redirect("main:show_product")
-
-    context = {"form": form}
-
-    return render(request, "edit_products.html", context)
-
-
-def show_products_list(request):
-    return render(request, "main-product.html", {})
-
-
-def create_products(request):
-    form = ProductForm(request.POST or None)
-
-    if form.is_valid() and request.method == "POST":
-        form.save()
-        return redirect("main:show_main")
-
-    context = {"form": form}
-    return render(request, "create_products.html", context)
-
-
-def show_product_detail(request, id):
-    get_object_or_404(Product, pk=id)
-
-    return render(request, "product-detail.html", {"id": id})
-
-
-def show_json_by_id(request, products_id):
-    try:
-        products_item = Product.objects.get(pk=products_id)
-        json_data = serializers.serialize("json", [products_item])
-        return HttpResponse(json_data, content_type="application/json")
-    except Product.DoesNotExist:
-        return HttpResponse(status=404)
-
-
+# ================= LIST PRODUCT =================
 @require_http_methods(["GET"])
 def product_api_view(request):
     queryset = Product.objects.select_related("user").all()
 
-    search_query = request.GET.get("search", None)
-    categories = request.GET.getlist("category")
-    min_price = request.GET.get("min_price", None)
-    max_price = request.GET.get("max_price", None)
-    sort_by = request.GET.get("sort", "latest")
-
-    if search_query:
+    search = request.GET.get("search")
+    if search:
         queryset = queryset.filter(
-            Q(name__icontains=search_query) | Q(description__icontains=search_query)
+            Q(name__icontains=search) | Q(description__icontains=search)
         )
-    if categories:
-        queryset = queryset.filter(category__in=categories)
-    if min_price:
-        try:
-            queryset = queryset.filter(price__gte=int(min_price))
-        except ValueError:
-            pass
-    if max_price:
-        try:
-            queryset = queryset.filter(price__lte=int(max_price))
-        except ValueError:
-            pass
-    if sort_by == "price_asc":
-        queryset = queryset.order_by("price")
-    elif sort_by == "price_desc":
-        queryset = queryset.order_by("-price")
-    else:
-        queryset = queryset.order_by("-id")
 
-    page_number = request.GET.get("page", 1)
-    products_per_page = 9
-    paginator = Paginator(queryset, products_per_page)
-    try:
-        page_obj = paginator.page(page_number)
-    except PageNotAnInteger:
-        page_obj = paginator.page(1)
-    except EmptyPage:
-        page_obj = paginator.page(paginator.num_pages)
+    paginator = Paginator(queryset.order_by("-id"), 9)
+    page = paginator.get_page(request.GET.get("page", 1))
 
-    results = []
-    for product in page_obj.object_list:
-        results.append(
-            {
-                "id": str(product.id),
-                "name": product.name,
-                "price": product.price,
-                "description": product.description,
-                "category": product.category,
-                "thumbnail": product.thumbnail or "",
-                "is_featured": product.is_featured,
-                "seller_name": product.user.username if product.user else "Toko Resmi",
-                "seller_id": product.user.id if product.user else None,
-            }
-        )
-    response_data = {
-        "total_count": paginator.count,
-        "total_pages": paginator.num_pages,
-        "current_page": page_obj.number,
-        "logged_in_user_id": request.user.id if request.user.is_authenticated else None,
-        "is_admin": request.user.is_admin if request.user.is_authenticated else False,
-        "results": results,
-    }
-    return JsonResponse(response_data)
+    results = [
+        {
+            "id": p.id,
+            "name": p.name,
+            "price": p.price,
+            "description": p.description,
+            "category": p.category,
+            "thumbnail": p.thumbnail or "",
+            "is_featured": p.is_featured,
+            "seller_name": p.user.username if p.user else "Toko Resmi",
+            "seller_id": p.user.id if p.user else None,
+        }
+        for p in page
+    ]
+
+    return JsonResponse({"results": results})
 
 
+# ================= CREATE PRODUCT =================
 @csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def product_create_view(request):
     if not (request.user.is_admin or request.user.is_seller):
         return HttpResponseForbidden(
-            json.dumps({"error": "Anda tidak punya izin untuk menambah produk."}),
+            json.dumps({"error": "Tidak punya izin"}),
             content_type="application/json",
         )
 
     try:
-        new_product = Product(
+        product = Product.objects.create(
             user=request.user,
             name=request.POST.get("name"),
             price=int(request.POST.get("price")),
             category=request.POST.get("category"),
-            description=request.POST.get("description"),
-            thumbnail=request.POST.get("thumbnail", None) or None,
-            is_featured=request.POST.get("is_featured", "no") == "on",
+            description=request.POST.get("description", ""),
+            thumbnail=request.POST.get("thumbnail") or None,
+            is_featured=request.POST.get("is_featured") == "true",
         )
 
-        new_product.save()
-
-        log = ActionLog(
+        ActionLog.objects.create(
             actor=request.user.username,
-            action=f"Membuat produk dengan nama '{new_product.name}'",
+            action=f"Membuat produk '{product.name}'",
         )
-        log.save()
 
-        return JsonResponse({"success": True, "id": new_product.id}, status=201)
-    except (ValueError, TypeError):
-        return HttpResponseBadRequest(
-            json.dumps({"error": "Data harga tidak valid."}),
-            content_type="application/json",
-        )
+        return JsonResponse({"success": True, "id": product.id}, status=201)
+
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        return HttpResponseBadRequest(json.dumps({"error": str(e)}))
 
 
-@require_http_methods(["GET"])
-def product_detail_view(request, pk):
-    product = get_object_or_404(Product.objects.select_related("user"), pk=pk)
-
-    data = {
-        "id": product.id,
-        "name": product.name,
-        "price": product.price,
-        "category_display": product.get_category_display(),
-        "category": product.category,
-        "description": product.description,
-        "thumbnail": product.thumbnail or "",
-        "is_featured": product.is_featured,
-        "can_manage": (request.user.is_admin or request.user == product.user)
-        if request.user.is_authenticated
-        else False,
-        "seller": {
-            "username": product.user.username if product.user else "Toko Resmi",
-            "profile_pic": product.user.profile_pic if product.user else "",
-        },
-    }
-    return JsonResponse(data)
-
-
-@csrf_exempt
-@login_required
-@require_http_methods(["POST"])
-def product_update_view(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-
-    is_owner = product.user == request.user
-    is_admin = request.user.is_admin
-    if not (is_owner or is_admin):
-        return HttpResponseForbidden(
-            json.dumps({"error": "Anda tidak punya izin untuk mengubah produk ini."}),
-            content_type="application/json",
-        )
-
-    try:
-        data = request.POST
-
-        product.name = data.get("name")
-        product.price = int(data.get("price"))
-        product.category = data.get("category")
-        product.description = data.get("description")
-        product.thumbnail = data.get("thumbnail", None) or None
-        product.is_featured = data.get("is_featured", "no") == "on"
-        product.save()
-
-        log = ActionLog(
-            actor=request.user.username,
-            action=f"Mengedit produk dengan nama '{product.name}'",
-        )
-        log.save()
-
-        return JsonResponse({"success": True})
-    except (ValueError, TypeError):
-        return HttpResponseBadRequest(
-            json.dumps({"error": "Data harga tidak valid."}),
-            content_type="application/json",
-        )
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
-
-
+# ================= DELETE PRODUCT =================
 @csrf_exempt
 @login_required
 @require_http_methods(["POST"])
 def product_delete_view(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
-    is_owner = product.user == request.user
-    is_admin = request.user.is_admin
-    if not (is_owner or is_admin):
+    if not (request.user.is_admin or product.user == request.user):
         return HttpResponseForbidden(
-            json.dumps({"error": "Anda tidak punya izin untuk menghapus produk ini."}),
+            json.dumps({"error": "Tidak punya izin menghapus"}),
+            content_type="application/json",
+        )
+
+    name = product.name
+    product.delete()
+
+    ActionLog.objects.create(
+        actor=request.user.username,
+        action=f"Menghapus produk '{name}'",
+    )
+
+    return JsonResponse({"success": True})
+
+
+# ================= JSON UNTUK FLUTTER =================
+def show_json(request):
+    products = Product.objects.all()
+    return JsonResponse({
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "price": p.price,
+                "description": p.description,
+                "category": p.category,
+                "thumbnail": p.thumbnail or "",
+                "is_featured": p.is_featured,
+                "seller_name": p.user.username if p.user else "Toko Resmi",
+                "seller_id": p.user.id if p.user else None,
+            }
+            for p in products
+        ]
+    })
+# edit
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def product_update_view(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    # Permission: admin boleh edit semua, owner boleh edit miliknya
+    # Catatan: kalau product.user None (produk lama), hanya admin yg bisa edit
+    is_owner = (product.user == request.user)
+    is_admin = getattr(request.user, "is_admin", False)
+
+    if not (is_admin or is_owner):
+        return HttpResponseForbidden(
+            json.dumps({"error": "Tidak punya izin mengedit produk ini."}),
             content_type="application/json",
         )
 
     try:
-        product.delete()
+        name = request.POST.get("name", product.name)
+        price = request.POST.get("price", product.price)
+        category = request.POST.get("category", product.category)
 
-        log = ActionLog(
+        if not name or not str(price) or not category:
+            return HttpResponseBadRequest(
+                json.dumps({"error": "Field wajib tidak boleh kosong."}),
+                content_type="application/json",
+            )
+
+        product.name = name
+        product.price = int(price)
+        product.category = category
+        product.description = request.POST.get("description", product.description or "")
+        product.thumbnail = request.POST.get("thumbnail") or None
+        product.is_featured = request.POST.get("is_featured") == "true"
+        product.save()
+
+        ActionLog.objects.create(
             actor=request.user.username,
-            action=f"Menghapus produk dengan nama '{product.name}'",
+            action=f"Mengedit produk '{product.name}'",
         )
-        log.save()
 
-        return JsonResponse({"success": True}, status=200)
+        return JsonResponse({"success": True})
+
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+# update product
+@csrf_exempt
+@login_required
+@require_http_methods(["POST"])
+def product_update_view(request, pk):
+    product = get_object_or_404(Product, pk=pk)
 
-def show_json(request):
-    products_list = Product.objects.all()
-    products = [
-        {
-            "id": str(product.id),
-            "name": product.name,
-            "price": product.price,
-            "description": product.description,
-            "category": product.category,
-            "thumbnail": product.thumbnail or "",
-            "is_featured": product.is_featured,
-            "seller_name": product.user.username if product.user else "Toko Resmi",
-            "seller_id": product.user.id if product.user else None,
-        }
-        for product in products_list
-    ]
-    return JsonResponse({"products": products}, status=200)
+    # aturan izin: admin/seller/owner (silakan sesuaikan)
+    is_owner = (product.user == request.user)
+    is_admin = getattr(request.user, "is_admin", False)
+    is_seller = getattr(request.user, "is_seller", False)
+
+    if not (is_admin or is_seller or is_owner):
+        return HttpResponseForbidden(
+            json.dumps({"error": "Tidak punya izin untuk mengedit produk ini."}),
+            content_type="application/json",
+        )
+
+    try:
+        name = request.POST.get("name")
+        price = request.POST.get("price")
+        category = request.POST.get("category")
+
+        if not name or not price or not category:
+            return HttpResponseBadRequest(
+                json.dumps({"error": "Field wajib tidak boleh kosong (name, price, category)."}),
+                content_type="application/json",
+            )
+
+        product.name = name
+        product.price = int(price)
+        product.category = category
+        product.description = request.POST.get("description", "")
+        product.thumbnail = request.POST.get("thumbnail") or None
+
+        # Flutter akan kirim "true"/"false"
+        product.is_featured = (request.POST.get("is_featured") == "true")
+
+        product.save()
+
+        ActionLog.objects.create(
+            actor=request.user.username,
+            action=f"Mengedit produk '{product.name}' (id={product.id})",
+        )
+
+        return JsonResponse({"success": True}, status=200)
+
+    except ValueError:
+        return HttpResponseBadRequest(
+            json.dumps({"error": "Harga harus angka."}),
+            content_type="application/json",
+        )
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
