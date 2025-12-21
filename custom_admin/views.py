@@ -1,24 +1,28 @@
-from django.shortcuts import render
-from django.http import HttpRequest, JsonResponse
+import json
+
 from django.core.paginator import Paginator
 from django.db.models import Q
-
+from django.http import HttpRequest, JsonResponse
+from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from account.models import CustomUser
-from product.models import Product
 from article.models import News
+from product.models import Product
 
 from .models import ActionLog
 from .utils import staff_only
+
 
 @staff_only(redirect="/")
 def homepage(request: HttpRequest):
     return render(request, "admin/home.html", {})
 
+
 @staff_only(redirect="/")
 def accounts_page(request: HttpRequest):
     return render(request, "admin/accounts.html", {})
+
 
 @staff_only()
 def get_summary(request: HttpRequest):
@@ -32,16 +36,13 @@ def get_summary(request: HttpRequest):
         "article_count": article_count,
         "product_count": product_count,
         "recent_logs": [
-            {
-                "timestamp": log.timestamp,
-                "actor": log.actor,
-                "action": log.action
-            }
+            {"timestamp": log.timestamp, "actor": log.actor, "action": log.action}
             for log in recent_logs
-        ]
+        ],
     }
 
     return JsonResponse(data)
+
 
 @staff_only()
 def get_accounts_api(request: HttpRequest):
@@ -76,12 +77,36 @@ def get_accounts_api(request: HttpRequest):
                 "username": data.username,
                 "is_admin": data.is_admin,
                 "is_author": data.is_author,
-                "is_seller": data.is_seller
-            } for data in datas
+                "is_seller": data.is_seller,
+            }
+            for data in datas
+        ],
+    }
+
+    return JsonResponse(result, safe=False)
+
+
+@csrf_exempt
+@staff_only()
+def get_all_accounts_api(request: HttpRequest):
+    accounts = CustomUser.objects.order_by("username").all()
+
+    result = {
+        "accounts": [
+            {
+                "id": account.id,
+                "profile_pic": account.profile_pic,
+                "username": account.username,
+                "is_admin": account.is_admin,
+                "is_author": account.is_author,
+                "is_seller": account.is_seller,
+            }
+            for account in accounts
         ]
     }
 
     return JsonResponse(result, safe=False)
+
 
 @staff_only()
 def add_account_api(request: HttpRequest):
@@ -92,15 +117,17 @@ def add_account_api(request: HttpRequest):
     is_seller = request.POST.get("is_seller") == "true"
 
     if not username or not password:
-        return JsonResponse({"status": "error", "message": "Username and password are required."}, safe=False)
+        return JsonResponse(
+            {"status": "error", "message": "Username and password are required."},
+            safe=False,
+        )
 
     if CustomUser.objects.filter(username=username).exists():
-        return JsonResponse({"status": "error", "message": "Username already exists."}, safe=False)
+        return JsonResponse(
+            {"status": "error", "message": "Username already exists."}, safe=False
+        )
 
-    account = CustomUser.objects.create_user(
-        username=username,
-        password=password
-    )
+    account = CustomUser.objects.create_user(username=username, password=password)
 
     account.is_admin = is_admin
     account.is_author = is_author
@@ -109,21 +136,26 @@ def add_account_api(request: HttpRequest):
     account.save()
     return JsonResponse({"status": "success"}, safe=False)
 
+
 @csrf_exempt
 @staff_only()
 def edit_account_api(request: HttpRequest):
-    account_id = request.POST.get("id")
-    username = request.POST.get("username")
-    profile_pic = request.POST.get("profile_pic")
-    password = request.POST.get("password")
-    is_admin = request.POST.get("is_admin") == "on"
-    is_author = request.POST.get("is_author") == "on"
-    is_seller = request.POST.get("is_seller") == "on"
+    data = request.POST or json.loads(request.body)
+
+    account_id = data.get("id")
+    username = data.get("username")
+    profile_pic = data.get("profile_pic")
+    password = data.get("password")
+    is_admin = data.get("is_admin") == "on"
+    is_author = data.get("is_author") == "on"
+    is_seller = data.get("is_seller") == "on"
 
     try:
         account = CustomUser.objects.get(id=account_id)
     except CustomUser.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Account not found."}, safe=False, status=400)
+        return JsonResponse(
+            {"status": "error", "message": "Account not found."}, safe=False, status=400
+        )
 
     account.username = username
     if password:
@@ -134,31 +166,42 @@ def edit_account_api(request: HttpRequest):
     account.is_seller = is_seller
     account.save()
 
-    log = ActionLog.objects.create(actor = request.user.username, action = f"Mengedit user dengan username '{account.username}'")
+    log = ActionLog.objects.create(
+        actor=request.user.username,
+        action=f"Mengedit user dengan username '{account.username}'",
+    )
     log.save()
 
     return JsonResponse({"status": "success"}, safe=False)
+
 
 @csrf_exempt
 @staff_only()
 def delete_account_api(request: HttpRequest):
-    account_id = request.POST.get("id")
+    account_id = request.POST.get("id") or json.loads(request.body).get("id")
 
     try:
         account = CustomUser.objects.get(id=account_id)
     except CustomUser.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Account not found."}, safe=False)
+        return JsonResponse(
+            {"status": "error", "message": "Account not found."}, safe=False
+        )
 
     account.delete()
 
-    log = ActionLog.objects.create(actor = request.user.username, action = f"Menghapus user dengan username '{account.username}'")
+    log = ActionLog.objects.create(
+        actor=request.user.username,
+        action=f"Menghapus user dengan username '{account.username}'",
+    )
     log.save()
 
     return JsonResponse({"status": "success"}, safe=False)
 
+
 @staff_only(redirect="/")
 def action_logs_page(request: HttpRequest):
     return render(request, "admin/action-logs.html", {})
+
 
 @staff_only()
 def get_action_logs_api(request: HttpRequest):
@@ -185,20 +228,43 @@ def get_action_logs_api(request: HttpRequest):
                 "id": log.id,
                 "timestamp": log.timestamp,
                 "actor": log.actor,
-                "action": log.action
-            } for log in datas
+                "action": log.action,
+            }
+            for log in datas
+        ],
+    }
+
+    return JsonResponse(result, safe=False)
+
+
+@csrf_exempt
+@staff_only()
+def get_all_action_logs_api(request: HttpRequest):
+    logs = ActionLog.objects.order_by("-timestamp").all()
+
+    result = {
+        "logs": [
+            {
+                "id": log.id,
+                "timestamp": log.timestamp,
+                "actor": log.actor,
+                "action": log.action,
+            }
+            for log in logs
         ]
     }
 
     return JsonResponse(result, safe=False)
 
+
 @csrf_exempt
 @staff_only()
 def delete_action_log_api(request: HttpRequest):
-    ids = request.POST.getlist("ids")
+    ids = request.POST.getlist("ids") or json.loads(request.body)["ids"]
 
     ActionLog.objects.filter(id__in=ids).delete()
     return JsonResponse({"status": "success"}, safe=False)
+
 
 @staff_only()
 def purge_action_logs_api(request: HttpRequest):
