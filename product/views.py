@@ -49,24 +49,31 @@ def product_api_view(request):
 
 # ================= CREATE PRODUCT =================
 @csrf_exempt
-@login_required
 @require_http_methods(["POST"])
 def product_create_view(request):
-    if not (request.user.is_admin or request.user.is_seller):
-        return HttpResponseForbidden(
-            json.dumps({"error": "Tidak punya izin"}),
-            content_type="application/json",
-        )
+    # Jangan pakai @login_required untuk API karena dia redirect HTML
+    if not request.user.is_authenticated:
+        return JsonResponse({"success": False, "error": "Unauthorized (belum login)"}, status=401)
+
+    if not (getattr(request.user, "is_admin", False) or getattr(request.user, "is_seller", False)):
+        return JsonResponse({"success": False, "error": "Tidak punya izin"}, status=403)
 
     try:
+        name = request.POST.get("name")
+        price = request.POST.get("price")
+        category = request.POST.get("category")
+
+        if not name or not price or not category:
+            return JsonResponse({"success": False, "error": "Field wajib tidak boleh kosong"}, status=400)
+
         product = Product.objects.create(
             user=request.user,
-            name=request.POST.get("name"),
-            price=int(request.POST.get("price")),
-            category=request.POST.get("category"),
+            name=name,
+            price=int(price),
+            category=category,
             description=request.POST.get("description", ""),
             thumbnail=request.POST.get("thumbnail") or None,
-            is_featured=request.POST.get("is_featured") == "true",
+            is_featured=(request.POST.get("is_featured") == "true"),
         )
 
         ActionLog.objects.create(
@@ -76,8 +83,11 @@ def product_create_view(request):
 
         return JsonResponse({"success": True, "id": product.id}, status=201)
 
+    except ValueError:
+        return JsonResponse({"success": False, "error": "Harga harus angka"}, status=400)
     except Exception as e:
-        return HttpResponseBadRequest(json.dumps({"error": str(e)}))
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
 
 
 # ================= DELETE PRODUCT =================
