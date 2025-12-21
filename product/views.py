@@ -229,3 +229,8 @@ def product_delete_view(request, pk):
         return JsonResponse({'success': True}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+def show_json(request):
+    products_list = Product.objects.all()
+    json_data = serializers.serialize("json", products_list)
+    return HttpResponse(json_data, content_type="application/json")
