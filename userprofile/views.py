@@ -97,7 +97,7 @@ def profile_content_api_view(request, user_id):
 @require_http_methods(["POST"])
 def profile_update_api_view(request):
     user = request.user
-    data = request.POST
+    data = request.POST or json.loads(request.body)
     new_password = data.get("new_password")
 
     if new_password:
